@@ -21,6 +21,8 @@ void Test::parserTest_data()
   QTest::newRow("parenthesis") << "(((x-10))^3)*y-(5+10)" << -390.0F;
   QTest::newRow("operator")    << "-3*x^2-8/2+(-2-5)"     << -86.0F;
   QTest::newRow("variables")   << "x/x-y^y+2*x"           << -16.0F;
+  QTest::newRow("functions")   << "pow( sqrt( 4*x*log10(10^5) ), 2 )" << 100.0F;
+  QTest::newRow("mixed")       << "(x-y)^pow(y-1,3/y)*(x*sqrt(25))"   << 100.0F;
 }
 
 void Test::parserTest()
