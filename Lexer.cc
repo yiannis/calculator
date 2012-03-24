@@ -6,41 +6,6 @@
 
 using namespace std;
 
-string tokenToString(TokenType t)
-{
-  switch (t) {
-    case VARX:
-      return "x";
-    case VARY:
-      return "y";
-    case FLOAT:
-      return "float";
-    case EXPR:
-      return "<expr>";
-    case PLUS:
-      return "+";
-    case MINUS:
-    case NEGATIVE:
-      return "-";
-    case MULT:
-      return "*";
-    case DIV:
-      return "/";
-    case POWER:
-      return "^";
-    case FUNCTION:
-      return "<func>";
-    case LPAREN:
-      return "(";
-    case RPAREN:
-      return ")";
-    case COMMA:
-      return ",";
-    default:
-      return "unknown";
-  }
-}
-
 void Lexer::printTokens(list<Token>* tokens)
 {
   list<Token>::const_iterator i = tokens->begin();
@@ -112,24 +77,24 @@ void Lexer::scan(istream& input)
     } else {
       switch (in) {
         case '+':
-          m_tokens.push_back(Token(PLUS, new ExprBinOp('+')));
+          m_tokens.push_back(Token(PLUS, new ExprBinOp(PLUS)));
           break;
         case '-':
           if (m_tokens.empty() ||
               m_tokens.back().type() == LPAREN ||
               m_tokens.back().type() == COMMA)
-            m_tokens.push_back(Token(NEGATIVE, new ExprUnaryOp('-')));
+            m_tokens.push_back(Token(NEGATIVE, new ExprUnaryOp(NEGATIVE)));
           else
-            m_tokens.push_back(Token(MINUS, new ExprBinOp('-')));
+            m_tokens.push_back(Token(MINUS, new ExprBinOp(MINUS)));
           break;
         case '*':
-          m_tokens.push_back(Token(MULT, new ExprBinOp('*')));
+          m_tokens.push_back(Token(MULT, new ExprBinOp(MULT)));
           break;
         case '/':
-          m_tokens.push_back(Token(DIV, new ExprBinOp('/')));
+          m_tokens.push_back(Token(DIV, new ExprBinOp(DIV)));
           break;
         case '^':
-          m_tokens.push_back(Token(POWER, new ExprBinOp('^')));
+          m_tokens.push_back(Token(POWER, new ExprBinOp(POWER)));
           break;
         case '(':
           m_tokens.push_back(Token(LPAREN));

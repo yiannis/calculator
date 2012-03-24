@@ -7,6 +7,7 @@ SET( CMAKE_BUILD_TYPE "RelWithDebInfo" )
 SET( PARSER_SOURCES
   "Expr.cc"
   "Function.cc"
+  "Token.cc"
   "Lexer.cc"
   "Parser.cc")
 

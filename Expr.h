@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Function.h"
+#include "Token.h"
 
 class ExprBase {
   public:
@@ -32,11 +33,11 @@ class ExprVariable : public ExprBase {
 
 class ExprUnaryOp : public ExprBase {
   private:
-    char m_op;
+    TokenType m_op;
     ExprBase *m_expr;
 
   public:
-    ExprUnaryOp(char op, ExprBase* expr = NULL)
+    ExprUnaryOp(TokenType op, ExprBase* expr = NULL)
       : m_op(op), m_expr(expr)
     {}
 
@@ -47,11 +48,11 @@ class ExprUnaryOp : public ExprBase {
 
 class ExprBinOp : public ExprBase {
   private:
-    char m_op;
+    TokenType m_op;
     ExprBase *m_expr_left, *m_expr_right;
 
   public:
-    ExprBinOp(char op, ExprBase* left = NULL, ExprBase* right = NULL)
+    ExprBinOp(TokenType op, ExprBase* left = NULL, ExprBase* right = NULL)
       : m_op(op), m_expr_left(left), m_expr_right(right)
     {}
 

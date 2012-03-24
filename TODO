@@ -3,9 +3,10 @@ TODO
 1. Remove redundant parenthesis
 2. Make ExprBase() private and create a 'static ExprBase* ExprBase::create(TokenType)' factory
 3. Put setArgs() in ExprBase.
-4. Replace 'char m_op' with 'TokenType m_op'
+   Does not help much. Should be put in a ExprBranch: public ExprBase
 5. Add pi/e/... constants
 6. Use Exceptions
 
+- Replace 'char m_op' with 'TokenType m_op' [OK]
 - Support ++, --,... [WRONG]: x,y are immutable
 - Handle unary '-' [OK]

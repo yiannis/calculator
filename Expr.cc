@@ -10,7 +10,7 @@ float ExprUnaryOp::result()
   float expr = m_expr->result();
 
   switch (m_op) {
-    case '-':
+    case NEGATIVE:
       return -expr;
   }
 }
@@ -21,15 +21,15 @@ float ExprBinOp::result()
   float r = m_expr_right->result();
 
   switch (m_op) {
-    case '+':
+    case PLUS:
       return l+r;
-    case '-':
+    case MINUS:
       return l-r;
-    case '*':
+    case MULT:
       return l*r;
-    case '/':
+    case DIV:
       return l/r;
-    case '^':
+    case POWER:
       return pow(l, r);
   }
 }
