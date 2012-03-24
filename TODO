@@ -1,0 +1,11 @@
+TODO
+0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
+1. Remove redundant parenthesis
+2. Make ExprBase() private and create a 'static ExprBase* ExprBase::create(TokenType)' factory
+3. Put setArgs() in ExprBase.
+4. Replace 'char m_op' with 'TokenType m_op'
+5. Add pi/e/... constants
+6. Use Exceptions
+
+- Support ++, --,... [WRONG]: x,y are immutable
+- Handle unary '-' [OK]
