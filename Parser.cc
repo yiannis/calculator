@@ -231,7 +231,7 @@ bool Parser::parseBinOp()
       return false; // If the next operator has higher precedence, leave
     }
     if (before != m_tokens->begin() && // 'before2' exists
-        before2->type() >= PLUS &&
+        before2->type() >= NEGATIVE &&
         before2->type() <= POWER &&
         Precedence[m_item->type()] < Precedence[before2->type()]) {
       clog << "Binop " << tokenToString(m_item->type())
@@ -255,11 +255,11 @@ map<TokenType,int> initPrecedenceMap()
   map<TokenType,int> pm;
 
   pm[PLUS]     = 10;
-  pm[MINUS]    = 10;
-  pm[NEGATIVE] = 10;
-  pm[MULT]     = 20;
-  pm[DIV]      = 20;
-  pm[POWER]    = 30;
+  pm[MINUS]    = 15;
+  pm[NEGATIVE] = 20;
+  pm[MULT]     = 30;
+  pm[DIV]      = 30;
+  pm[POWER]    = 40;
 
   return pm;
 }
