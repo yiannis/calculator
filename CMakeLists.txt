@@ -11,8 +11,17 @@ SET( PARSER_SOURCES
   "Lexer.cc"
   "Parser.cc")
 
-##################TARGETS##################
+SET( TEST_H "Test.h" )
 
-#calculator##################
+# For Qt-Test
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtTest REQUIRED)
+INCLUDE(${QT_USE_FILE})
+qt4_wrap_cpp( TEST_MOC_SOURCES ${TEST_H} )
+
+##################TARGETS##################
+#calculator#
 ADD_EXECUTABLE( calculator "calculator.cc" ${PARSER_SOURCES} )
-#TARGET_LINK_LIBRARIES( mytasks ${QT_LIBRARIES} )
+
+#test#
+ADD_EXECUTABLE( test "Test.cc" ${PARSER_SOURCES} ${TEST_MOC_SOURCES} )
+TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES} )
