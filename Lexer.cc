@@ -48,7 +48,7 @@ void Lexer::printTokens(list<Token>* tokens)
         cout << " , " << flush;
         break;
       case EXPR:
-        cout << " <expr> " << flush;
+        cout << " " << i->expr()->result() << " " << flush;
         break;
       case FUNCTION:
         cout << static_cast<ExprFunction*>(i->expr())->name() << flush;
