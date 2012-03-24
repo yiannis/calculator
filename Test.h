@@ -8,10 +8,14 @@ class Test: public QObject
 {
   Q_OBJECT
 
+    private:
+      float m_x, m_y;
+
     private slots:
-      void parenthesisTest();
-      void operatorsTest();
-      void variablesTest();
+      void initTestCase();
+
+      void parserTest();
+      void parserTest_data();
 };
 
 #endif //TEST_H
