@@ -250,4 +250,18 @@ bool Parser::parseBinOp()
   return false;
 }
 
-map<TokenType,int> Parser::Precedence = map<TokenType,int>();
+map<TokenType,int> initPrecedenceMap()
+{
+  map<TokenType,int> pm;
+
+  pm[PLUS]     = 10;
+  pm[MINUS]    = 10;
+  pm[NEGATIVE] = 10;
+  pm[MULT]     = 20;
+  pm[DIV]      = 20;
+  pm[POWER]    = 30;
+
+  return pm;
+}
+
+map<TokenType,int> Parser::Precedence(initPrecedenceMap());
