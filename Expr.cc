@@ -45,6 +45,7 @@ float ExprFunction::result()
     }
   } else {
     cerr << __func__ << "(): " << __LINE__ << ": Error: Calling a function without arguments" << endl;
+    throw 3;
   }
 
   return result;

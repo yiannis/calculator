@@ -118,7 +118,7 @@ bool Parser::parseFunc()
   if (lparen->type() == LPAREN) {
     if (after1->type() == RPAREN) {
       cerr << __func__ << "(): " << __LINE__ << ": Function with no arguments, unsupported" << endl;
-      //throw;
+      throw 1;
     }
     if (after1->type() >= VARX &&
         after1->type() <= EXPR &&
@@ -155,11 +155,11 @@ bool Parser::parseFunc()
         after4->type() == COMMA) {
       // Function with three or more arguments
       cerr << __func__ << "(): " << __LINE__ << ": Function with >3 arguments, unsupported" << endl;
-      //throw;
+      throw 1;
     }
   } else {
     cerr << __func__ << "(): " << __LINE__ << ": No '(' after function name." << endl;
-    //throw;
+    throw 1;
   }
   return false;
 }
@@ -174,7 +174,7 @@ bool Parser::parseUnaryOp()
 
   if (after == m_tokens->end()) {
     cerr << __func__ << "(): " << __LINE__ << ": No argument for unary operator '-'" << endl;
-    //throw;
+    throw 1;
   }
 
   if (after->type() >= VARX &&
@@ -211,10 +211,10 @@ bool Parser::parseBinOp()
   //   ^---::m_item
   if (after == m_tokens->end()) {
     cerr << __func__ << "(): " << __LINE__ << ": No second argument for binary operator" << endl;
-    //throw;
+    throw 1;
   } else if (m_item == m_tokens->begin()) { // 'before' exists
     cerr << __func__ << "(): " << __LINE__ << ": No first argument for binary operator" << endl;
-    //throw;
+    throw 1;
   }
 
   if (before->type() >= VARX &&

@@ -5,7 +5,7 @@ TODO
 3. Put setArgs() in ExprBase.
    Does not help much. Should be put in a ExprBranch: public ExprBase
 5. Add pi/e/... constants
-6. Use Exceptions
+6. Really use Exceptions, not just throw 'int'
 
 - Replace 'char m_op' with 'TokenType m_op' [OK]
 - Support ++, --,... [WRONG]: x,y are immutable

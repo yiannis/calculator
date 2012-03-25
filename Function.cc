@@ -92,7 +92,7 @@ float Function::call(Function::ID id, float arg)
       return sqrt(arg);
     default:
       cerr << __func__ << "(): " << __LINE__ << " :Unknown id '" << id << "'" << endl;
-      return 0.0F;
+      throw 2;
   }
 }
 
@@ -105,6 +105,6 @@ float Function::call(Function::ID id, float arg1, float arg2)
       return atan2(arg1, arg2);
     default:
       cerr << __func__ << "(): " << __LINE__ << " :Unknown id '" << id << "'" << endl;
-      return 0.0F;
+      throw 2;
   }
 }
