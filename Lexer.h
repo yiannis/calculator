@@ -13,8 +13,8 @@ class Lexer {
     float *m_x, *m_y, *m_t;
 
   public:
-    Lexer(std::istream& input, float *x, float *y) :
-      m_x(x), m_y(y)
+    Lexer(std::istream& input, float *x, float *y, float *t) :
+      m_x(x), m_y(y), m_t(t)
     {
       scan(input);
     }

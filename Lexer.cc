@@ -135,7 +135,7 @@ void Lexer::scanString(istream& input)
   else if (name == "y")
     m_tokens.push_back(Token(VARY, new ExprVariable(m_y)));
   else if (name == "t")
-    m_tokens.push_back(Token(VARY, new ExprVariable(m_t)));
+    m_tokens.push_back(Token(VART, new ExprVariable(m_t)));
   else
     m_tokens.push_back(Token(FUNCTION, new ExprFunction(name)));
 }
