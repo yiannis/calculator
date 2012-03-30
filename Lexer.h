@@ -10,7 +10,7 @@
 class Lexer {
   private:
     std::list<Token> m_tokens;
-    float *m_x, *m_y;
+    float *m_x, *m_y, *m_t;
 
   public:
     Lexer(std::istream& input, float *x, float *y) :

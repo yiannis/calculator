@@ -19,6 +19,9 @@ void Lexer::printTokens(list<Token>* tokens)
       case VARY:
         cout << " y " << flush;
         break;
+      case VART:
+        cout << " t " << flush;
+        break;
       case FLOAT:
         cout << " " << i->expr()->result() << " " << flush;
         break;
@@ -131,6 +134,8 @@ void Lexer::scanString(istream& input)
     m_tokens.push_back(Token(VARX, new ExprVariable(m_x)));
   else if (name == "y")
     m_tokens.push_back(Token(VARY, new ExprVariable(m_y)));
+  else if (name == "t")
+    m_tokens.push_back(Token(VARY, new ExprVariable(m_t)));
   else
     m_tokens.push_back(Token(FUNCTION, new ExprFunction(name)));
 }

@@ -5,6 +5,7 @@ enum TokenType {
   // Variables
   VARX,
   VARY,
+  VART,
 
   // Literals
   FLOAT,

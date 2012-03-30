@@ -11,6 +11,8 @@ string tokenToString(TokenType t)
       return "x";
     case VARY:
       return "y";
+    case VART:
+      return "t";
     case FLOAT:
       return "float";
     case EXPR:
