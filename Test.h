@@ -4,12 +4,14 @@
 #include <QtTest>
 #include <QObject>
 
+#include "Executor.h"
+
 class Test: public QObject
 {
   Q_OBJECT
 
     private:
-      float m_x, m_y;
+      Executor m_code;
 
     private slots:
       void initTestCase();

@@ -9,8 +9,8 @@ using namespace std;
 
 void Test::initTestCase()
 {
-  m_x = 5;
-  m_y = 3;
+  m_code.x() = 5;
+  m_code.y() = 3;
 }
 
 void Test::parserTest_data()
@@ -31,12 +31,12 @@ void Test::parserTest()
   QFETCH(float, result);
 
   istringstream input(function.toUtf8().constData());
-  Lexer lexer(input, &m_x, &m_y);
+  Lexer lexer(input, m_code.x_p(), m_code.y_p());
   Parser parser(lexer.getTokens());
 
   QVERIFY( parser.OK() );
 
-  QCOMPARE( result, parser.getAST()->result() );
+  QCOMPARE( result, m_code.setAST( parser.getAST() ).run() );
 }
 
 QTEST_MAIN(Test)
