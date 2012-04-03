@@ -1,0 +1,23 @@
+This is just an experiment, to write a simple parser for arithmetic expressions.
+The Lexer just reads the full input into a list of Tokens.
+Then the Parser creates an AST, using some non-recursive parse functions.
+
+Compile:
+$ cmake .
+$ make
+
+If you have qt-devel libraries, tests will also be created:
+$ ./test
+
+Usage:
+$ ./calculator "math-expression" x y t
+
+The parser recognizes x,y,t variables and a few C math functions, eg:
+$ ./calculator "x+y+sin(t)" 4 5 2
+
+WARNING:
+This code is for testing purposes, not for production use!
+
+--
+Copyright 2012 Yiannis Belias
+Use under the GPLv3 or later, see COPYING. 
