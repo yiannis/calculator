@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <cmath>
 
 #include "Lexer.h"
 
@@ -136,6 +137,14 @@ void Lexer::scanString(istream& input)
     m_tokens.push_back(Token(VARY, new ExprVariable(m_y)));
   else if (name == "t")
     m_tokens.push_back(Token(VART, new ExprVariable(m_t)));
+  else if (name == "pi")
+    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_PI)));
+  else if (name == "e")
+    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_E)));
+  else if (name == "ln2")
+    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_LN2)));
+  else if (name == "ln10")
+    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_LN10)));
   else
     m_tokens.push_back(Token(FUNCTION, new ExprFunction(name)));
 }
