@@ -2,90 +2,137 @@
 #define EXPR_H
 
 #include <string>
+#include <cassert>
+#include <exception>
 
 #include "Function.h"
 #include "Token.h"
 
+#define MAX_FUNCTION_ARGUMENTS 4
+
+
 class ExprBase {
+  protected:
+    Token m_token;
+
   public:
-    virtual float result() = 0;
+    ExprBase(Token t) : m_token(t) {}
+
+    // Expose token
+    TokenType type() const { return m_token.m_type; }
+    int position() const { return m_token.m_pos; }
+    std::string toString() const { return m_token.toString(); }
+
+    virtual float result() const = 0;
+
+    void error( const std::string& message ) const;
 };
 
 class ExprLiteral : public ExprBase {
-  private:
-    float m_number;
-
   public:
-    ExprLiteral(float number) : m_number(number) {}
+    ExprLiteral(Token t) :
+      ExprBase(t)
+    {
+      assert( m_token.m_type == FLOAT );
+    }
 
-    virtual float result() { return m_number; }
+    virtual float result() const { return m_token.m_data.value; }
 };
 
-class ExprVariable : public ExprBase {
-  private:
-    float *m_number;
-
+class ExprConstant : public ExprBase {
   public:
-    ExprVariable(float *number) : m_number(number) {}
+    ExprConstant(Token t) :
+      ExprBase(t)
+    {
+      assert( m_token.m_type == CONSTANT );
+    }
 
-    virtual float result() { return *m_number; }
+    virtual float result() const { return *(m_token.m_data.pValue); }
 };
 
 class ExprUnaryOp : public ExprBase {
   private:
-    TokenType m_op;
     ExprBase *m_expr;
 
   public:
-    ExprUnaryOp(TokenType op, ExprBase* expr = NULL)
-      : m_op(op), m_expr(expr)
-    {}
+    ExprUnaryOp(Token t, ExprBase* expr = NULL)
+      : ExprBase(t), m_expr(expr)
+    {
+      assert( m_token.m_type == NEGATIVE );
+    }
 
-    void setArgs(ExprBase* expr) { m_expr = expr; }
+    void setArg(ExprBase* expr) { m_expr = expr; }
 
-    virtual float result();
+    virtual float result() const;
 };
 
 class ExprBinOp : public ExprBase {
   private:
-    TokenType m_op;
-    ExprBase *m_expr_left, *m_expr_right;
+    ExprBase *m_exprLeft, *m_exprRight;
 
   public:
-    ExprBinOp(TokenType op, ExprBase* left = NULL, ExprBase* right = NULL)
-      : m_op(op), m_expr_left(left), m_expr_right(right)
-    {}
+    ExprBinOp(Token t, ExprBase* left = NULL, ExprBase* right = NULL)
+      : ExprBase(t), m_exprLeft(left), m_exprRight(right)
+    {
+      assert( m_token.m_type >= PLUS && m_token.m_type <= POWER );
+    }
 
     void setArgs(ExprBase* left, ExprBase* right)
     {
-      m_expr_left = left;
-      m_expr_right = right;
+      m_exprLeft = left;
+      m_exprRight = right;
     }
 
-    virtual float result();
+    virtual float result() const ;
 };
 
 class ExprFunction : public ExprBase {
   private:
-    Function::ID m_id;
-    ExprBase *m_arg1, *m_arg2;
+    int m_numArgs;
+    ExprBase* m_argv[MAX_FUNCTION_ARGUMENTS];
 
   public:
-    ExprFunction(std::string name, ExprBase* arg1 = NULL, ExprBase* arg2 = NULL) :
-      m_arg1(arg1), m_arg2(arg2)
+    ExprFunction( Token t ) :
+      ExprBase(t), m_numArgs(0)
     {
-      m_id = Function::nameToID(name);
+      assert( m_token.m_type == FUNCTION );
+
+      for (int i=0; i<MAX_FUNCTION_ARGUMENTS; i++)
+        m_argv[i] = NULL;
     }
 
-    void setArgs(ExprBase* arg1, ExprBase* arg2 = NULL)
+    void pushArg( ExprBase* arg )
     {
-      m_arg1 = arg1;
-      m_arg2 = arg2;
+      if (m_numArgs < MAX_FUNCTION_ARGUMENTS) {
+        m_argv[m_numArgs] = arg;
+        m_numArgs++;
+      } else
+        error( "Asked to exceed maximum function arguments" );
     }
 
-    std::string name() { return Function::IDtoName(m_id); }
-
-    virtual float result();
+    virtual float result() const;
 };
+
+class ExprError : public std::exception
+{
+  public:
+    ExprError( const ExprBase* expr, const std::string& message )
+    {
+      std::ostringstream msg(m_message);
+      msg << "expr error: "
+          << expr->position() << ": " << expr->toString()
+          << ": " << message;
+    }
+
+    virtual const char* what() const throw()
+    {
+      return m_message.c_str();
+    }
+    virtual ~ExprError() throw() {}
+
+  private:
+    std::string m_message;
+};
+
 
 #endif //EXPR_H

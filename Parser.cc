@@ -1,267 +1,220 @@
-#include <iostream>
-
 #include "Parser.h"
 
-using namespace std;
-
-bool Parser::itemIsOp()
+void Parser::error( const std::string& message ) const
 {
-  if (m_item->type() >= NEGATIVE &&
-      m_item->type() <= FUNCTION)
-    return true;
-  else
-    return false;
+  throw ParseError( m_token, message );
 }
 
-bool Parser::itemIsBinOp()
+void Parser::next()
 {
-  if (m_item->type() >= PLUS &&
-      m_item->type() <= POWER)
-    return true;
-  else
-    return false;
+  m_token = m_lexer->nextToken();
 }
 
-bool Parser::itemIsUnaryOp()
+ExprBase *Parser::parseFunction()
 {
-  if (m_item->type() == NEGATIVE)
-    return true;
-  else
-    return false;
-}
+  if (!isFunction())
+    error( "Expected a function" );
 
-bool Parser::itemIsFunc()
-{
-  if (m_item->type() == FUNCTION)
-    return true;
-  else
-    return false;
-}
+  Function::ID funcID = m_token.m_data.id;
 
-void Parser::nextOpItem()
-{
-  do {
-    m_item++;
-    if (m_item == m_tokens->end()) break;
-  } while(!itemIsOp());
-}
+  ExprFunction *func = new ExprFunction( m_token );
+  next(); // Get '('
+  if (!isLParen())
+    error( "Expected '('" );
 
-int Parser::tokenPos()
-{
-  int i=0;
-  for (list<Token>::const_iterator it = m_tokens->begin(); it != m_item; it++, i++);
-  return i;
-}
+  int argc = Function::numArguments[funcID];
+  ExprBase *argv[MAX_FUNCTION_ARGUMENTS] = {NULL};
+  for (int arg=0; arg<argc; arg++) {
+    argv[arg] = parseExpression();
 
-void Parser::eraseEnclosingParen()
-{
-  while (true) {
-    list<Token>::iterator before  = m_item,
-                          before2 = m_item,
-                          after   = m_item;
-    before2--; before2--; before--; after++;
-
-    if (before->type() == LPAREN && after->type() == RPAREN && before2->type() != FUNCTION) {
-      m_tokens->erase(before);
-      m_tokens->erase(after);
-    } else {
-      break;
-    }
-  }
-}
-
-void Parser::parseTokens()
-{
-  bool listChanged = false;
-
-  while (m_tokens->size() > 1) {
-    Lexer::printTokens(m_tokens); //dbg
-    clog << "m_item : " << tokenPos() << ": " << string(listChanged?"changed":"unchanged") << endl; //dbg
-    if (itemIsFunc())
-      listChanged = parseFunc()?true:listChanged;
-    else if (itemIsBinOp())
-      listChanged = parseBinOp()?true:listChanged;
-    else if (itemIsUnaryOp())
-      listChanged = parseUnaryOp()?true:listChanged;
-
-    nextOpItem();
-    if (m_item == m_tokens->end()) {
-      if (listChanged) {
-        m_item = m_tokens->begin();
-        listChanged = false;
-      } else {
-        cerr << __func__ << "(): " << __LINE__ << ": Unable to parse input. Quiting :-(" << endl;
-        m_parseOK = false;
+    next();
+    switch (m_token.m_type) {
+      case COMMA:
+        next(); // Consume ','
         break;
-      }
+      case RPAREN:
+        if (arg < argc-1)
+          error( "Too few arguments to function" );
+        break;
+      default:
+        error( "Expected ',' or ')'" );
+        break;
     }
   }
-}
+  next(); // Get expected ')'
 
-bool Parser::parseFunc()
-{
-  list<Token>::iterator lparen = m_item;
-  lparen++; // goto '('
-
-  // after1 :: one after '('
-  list<Token>::iterator after1 = lparen,
-                        after2 = lparen,
-                        after3 = lparen,
-                        after4 = lparen,
-                        after5 = lparen;
-  after1++;
-  after2++; after2++;
-  after3++; after3++; after3++;
-  after4++; after4++; after4++; after4++;
-  after5++; after5++; after5++; after5++; after5++;
-
-  if (lparen->type() == LPAREN) {
-    if (after1->type() == RPAREN) {
-      cerr << __func__ << "(): " << __LINE__ << ": Function with no arguments, unsupported" << endl;
-      throw 1;
-    }
-    if (after1->type() >= VARX &&
-        after1->type() <= EXPR &&
-        after2->type() == RPAREN) {
-      // Function with one argument
-      ExprBase *arg = after1->expr();
-      static_cast<ExprFunction*>(m_item->expr())->setArgs(arg);
-      m_tokens->erase(lparen, after3); // erase '(', arg, ')'
-      m_item->useAsExpr();
-      eraseEnclosingParen();
-
-      return true;
-    }
-    if (after1->type() >= VARX &&
-        after1->type() <= EXPR &&
-        after2->type() == COMMA &&
-        after3->type() >= VARX &&
-        after3->type() <= EXPR &&
-        after4->type() == RPAREN) {
-      // Function with two arguments
-      ExprBase *arg1 = after1->expr(), *arg2 = after3->expr();
-      static_cast<ExprFunction*>(m_item->expr())->setArgs(arg1, arg2);
-      m_tokens->erase(lparen, after5); // erase '(', arg1, ',', arg2, ')'
-      m_item->useAsExpr();
-      eraseEnclosingParen();
-
-      return true;
-    }
-    if (after1->type() >= VARX &&
-        after1->type() <= EXPR &&
-        after2->type() == COMMA &&
-        after3->type() >= VARX &&
-        after3->type() <= EXPR &&
-        after4->type() == COMMA) {
-      // Function with three or more arguments
-      cerr << __func__ << "(): " << __LINE__ << ": Function with >3 arguments, unsupported" << endl;
-      throw 1;
-    }
+  if (isRParen()) {
+    next(); // Consume ')'
+    for (int arg=0; arg<argc; arg++)
+      func->pushArg( argv[arg] );
   } else {
-    cerr << __func__ << "(): " << __LINE__ << ": No '(' after function name." << endl;
-    throw 1;
+    error( "Expected ')'" );
   }
-  return false;
+
+  return func;
 }
 
-bool Parser::parseUnaryOp()
-{ //FIXME Assumes UnaryOp == NEGATIVE
-  list<Token>::iterator before  = m_item,
-                        before2 = m_item,
-                        after   = m_item,
-                        after2  = m_item;
-  before2--; before2--; before--; after++; after2++; after2++;
+ExprBase *Parser::parseUnaryOp()
+{ // FIXME This is for prefix operators only
+  if (!isUnaryOp())
+    error( "Expected a unary operator" );
 
-  if (after == m_tokens->end()) {
-    cerr << __func__ << "(): " << __LINE__ << ": No argument for unary operator '-'" << endl;
-    throw 1;
-  }
+  ExprUnaryOp *op = new ExprUnaryOp( m_token );
 
-  if (after->type() >= VARX &&
-      after->type() <= EXPR) {
-    if (after2 != m_tokens->end() &&
-        after2->type() >= PLUS &&
-        after2->type() <= POWER &&
-        Precedence[m_item->type()] < Precedence[after2->type()]) {
-      clog << "Op " << tokenToString(m_item->type())
-           << " has lower precedence than " << tokenToString(after2->type()) << endl;
-      return false; // If the next operator has higher precedence, leave
+  next(); // Consume operator
+  ExprBase *expr = parseExpression();
+  next();
+  if (isBinaryOp()) {
+    if (Precedence[m_token.m_type] > Precedence[op->type()])
+      op->setArg( parseBinaryOp( expr ) );
+    else {
+      op->setArg( expr );
+      return parseBinaryOp( op );
     }
+  } else
+      op->setArg( expr );
 
-    ExprBase *right = after->expr();
-    static_cast<ExprUnaryOp*>(m_item->expr())->setArgs(right);
-    m_tokens->erase(after);
-    m_item->useAsExpr();
-    eraseEnclosingParen();
-    return true;
-  }
-
-  return false;
+  return op;
 }
 
-bool Parser::parseBinOp()
+ExprBase *Parser::parseBinaryOp( ExprBase *left )
 {
-  list<Token>::iterator before  = m_item,
-                        before2 = m_item,
-                        after   = m_item,
-                        after2  = m_item;
-  before2--; before2--; before--; after++; after2++; after2++;
+  if (!isBinaryOp())
+    error( "Expected a binary operator" );
 
-  // x * y - 2
-  //   ^---::m_item
-  if (after == m_tokens->end()) {
-    cerr << __func__ << "(): " << __LINE__ << ": No second argument for binary operator" << endl;
-    throw 1;
-  } else if (m_item == m_tokens->begin()) { // 'before' exists
-    cerr << __func__ << "(): " << __LINE__ << ": No first argument for binary operator" << endl;
-    throw 1;
-  }
+  ExprBinOp *op = new ExprBinOp( m_token );
 
-  if (before->type() >= VARX &&
-      before->type() <= EXPR &&
-      after->type() >= VARX &&
-      after->type() <= EXPR) {
-    clog << "Binop " << tokenToString(m_item->type()) << " is simple" << endl;
-    if (after2 != m_tokens->end() &&
-        after2->type() >= PLUS &&
-        after2->type() <= POWER &&
-        Precedence[m_item->type()] < Precedence[after2->type()]) {
-      clog << "Binop " << tokenToString(m_item->type())
-           << " has lower precedence than " << tokenToString(after2->type()) << endl;
-      return false; // If the next operator has higher precedence, leave
+  next(); // Consume operator
+  ExprBase *right = parseExpression();
+  next(); // Get next token
+  
+  // 3+5*2
+  // 3*5+2
+  if (isBinaryOp()) {
+    if (Precedence[m_token.m_type] > Precedence[op->type()])
+      op->setArgs( left, parseBinaryOp( right ) );
+    else {
+      op->setArgs( left, right );
+      return parseBinaryOp( op );
     }
-    if (before != m_tokens->begin() && // 'before2' exists
-        before2->type() >= NEGATIVE &&
-        before2->type() <= POWER &&
-        Precedence[m_item->type()] < Precedence[before2->type()]) {
-      clog << "Binop " << tokenToString(m_item->type())
-           << " has lower precedence than " << tokenToString(before2->type()) << endl;
-      return false; // If the previous operator has higher precedence, leave
-    }
+  } else
+    op->setArgs( left, right );
 
-    ExprBase *left = before->expr(), *right = after->expr();
-    static_cast<ExprBinOp*>(m_item->expr())->setArgs(left, right);
-    m_tokens->erase(before);
-    m_tokens->erase(after);
-    m_item->useAsExpr();
-    eraseEnclosingParen();
-    return true;
-  }
-  return false;
+  return op;
 }
 
-map<TokenType,int> initPrecedenceMap()
+ExprBase *Parser::parseNumber()
 {
-  map<TokenType,int> pm;
+  ExprBase *num = NULL;
+  switch (m_token.m_type) {
+    case CONSTANT:
+      num = new ExprConstant(m_token);
+      next(); // Consume constant
+      break;
+    case FLOAT:
+      num = new ExprLiteral(m_token);
+      next(); // Consume literal
+      break;
+    default:
+      error( "Expected a constant or literal" );
+      break;
+  }
+
+  return num;
+}
+
+ExprBase *Parser::parseExpression()
+{
+  ExprBase *expr = NULL;
+
+  if (isLParen()) {
+    next(); // Consume '('
+    expr = parseExpression();
+    if (isRParen())
+      next(); // Consume ')'
+    else
+      error( "Expected ')'" );
+  } else if (isNumber()) {
+    expr = parseNumber();
+  } else if (isFunction()) {
+    expr = parseFunction();
+  } else if (isUnaryOp()) {
+    expr = parseUnaryOp();
+  }
+
+  next();
+  if (isBinaryOp()) {
+    return parseBinaryOp( expr );
+  } else if (!isRParen() || !isComma() || !isEnd())
+    error( "Expected ')' or ','" );
+
+  return expr;
+}
+
+bool Parser::isEnd()
+{
+  m_token.m_type == END ? true : false;
+}
+
+bool Parser::isComma()
+{
+  m_token.m_type == COMMA ? true : false;
+}
+
+bool Parser::isLParen()
+{
+  m_token.m_type == LPAREN ? true : false;
+}
+
+bool Parser::isRParen()
+{
+  m_token.m_type == RPAREN ? true : false;
+}
+
+bool Parser::isUnaryOp()
+{
+  if (m_token.m_type >= NEGATIVE &&
+      m_token.m_type <= FACTORIAL)
+    return true;
+  else
+    return false;
+}
+
+bool Parser::isBinaryOp()
+{
+  if (m_token.m_type >= PLUS &&
+      m_token.m_type <= POWER)
+    return true;
+  else
+    return false;
+}
+
+bool Parser::isNumber()
+{
+  if (m_token.m_type >= CONSTANT &&
+      m_token.m_type <= FLOAT)
+    return true;
+  else
+    return false;
+}
+
+bool Parser::isFunction()
+{
+  m_token.m_type == FUNCTION ? true : false;
+}
+
+std::map<TokenType,int> initPrecedenceMap()
+{
+  std::map<TokenType,int> pm;
 
   pm[PLUS]     = 10;
-  pm[MINUS]    = 15;
-  pm[NEGATIVE] = 20;
+  pm[MINUS]    = 20;
   pm[MULT]     = 30;
   pm[DIV]      = 30;
-  pm[POWER]    = 40;
+  pm[NEGATIVE] = 40;
+  pm[POWER]    = 50;
 
   return pm;
 }
 
-map<TokenType,int> Parser::Precedence(initPrecedenceMap());
+std::map<TokenType,int> Parser::Precedence(initPrecedenceMap());

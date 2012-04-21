@@ -6,7 +6,7 @@
 class Function {
   public:
     enum ID {
-      SIN,
+      SIN = 0,
       COS,
       TAN,
       ACOS,
@@ -21,12 +21,17 @@ class Function {
       ATAN2,
 
       UNKNOWN,
+      NUM_FUNCTIONS,
     };
 
-  static ID nameToID(std::string name);
-  static std::string IDtoName(ID id);
-  static float call(ID id, float arg);
-  static float call(ID id, float arg1, float arg2);
+    static int *numArguments;
+
+    static int *fillNumArguments();
+    static ID nameToID(std::string name);
+    static std::string IDtoName(ID id);
+    static bool isNameValid( const std::string& name );
+    static float call(ID id, float arg);
+    static float call(ID id, float arg1, float arg2);
 };
 
 #endif //FUNCTION_H

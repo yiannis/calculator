@@ -4,17 +4,12 @@
 
 using namespace std;
 
-string tokenToString(TokenType t)
+
+const std::string Token::tokenToString(TokenType t)
 {
   switch (t) {
-    case VARX:
-      return "x";
-    case VARY:
-      return "y";
-    case VART:
-      return "t";
     case FLOAT:
-      return "float";
+      return "<float>";
     case EXPR:
       return "<expr>";
     case PLUS:

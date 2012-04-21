@@ -5,22 +5,29 @@
 
 using namespace std;
 
-float ExprUnaryOp::result()
+void ExprBase::error( const std::string& message ) const
+{
+  throw ExprError( this, message );
+}
+
+float ExprUnaryOp::result() const
 {
   float expr = m_expr->result();
 
-  switch (m_op) {
+  switch (type()) {
     case NEGATIVE:
       return -expr;
+    default:
+      error( "No such unary operator" );
   }
 }
 
-float ExprBinOp::result()
+float ExprBinOp::result() const
 {
-  float l = m_expr_left->result();
-  float r = m_expr_right->result();
+  float l = m_exprLeft->result();
+  float r = m_exprRight->result();
 
-  switch (m_op) {
+  switch (type()) {
     case PLUS:
       return l+r;
     case MINUS:
@@ -31,21 +38,26 @@ float ExprBinOp::result()
       return l/r;
     case POWER:
       return pow(l, r);
+    default:
+      error( "No such binary operator" );
   }
 }
 
-float ExprFunction::result()
+float ExprFunction::result() const
 {
   float result = 0.0F;
-  if (m_arg1) {
-    if (m_arg2) {
-      result = Function::call(m_id, m_arg1->result(), m_arg2->result());
-    } else {
-      result = Function::call(m_id, m_arg1->result());
-    }
-  } else {
-    cerr << __func__ << "(): " << __LINE__ << ": Error: Calling a function without arguments" << endl;
-    throw 3;
+  switch (m_numArgs) {
+    case 0:
+      error( "There's no function with 0 arguments" );
+      break;
+    case 1:
+      result = Function::call(m_token.m_data.id, m_argv[0]->result());
+      break;
+    case 2:
+      result = Function::call(m_token.m_data.id, m_argv[0]->result(), m_argv[1]->result());
+      break;
+    default:
+      error( "There's no function with more than 2 arguments" );
   }
 
   return result;

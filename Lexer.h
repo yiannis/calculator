@@ -3,30 +3,37 @@
 
 #include <iostream>
 #include <string>
-#include <list>
+#include <map>
 
 #include "Expr.h"
 
 class Lexer {
   private:
-    std::list<Token> m_tokens;
-    float *m_x, *m_y, *m_t;
+    int m_charPos;
+    Token m_token;
+    std::map<std::string, const float*> m_constants;
+    std::istream *m_input;
 
   public:
-    Lexer(std::istream& input, float *x, float *y, float *t) :
-      m_x(x), m_y(y), m_t(t)
+    Lexer(std::istream *input) :
+      m_charPos(-1), m_input(input), m_token(END, -1)
+    {}
+
+    void pushConstant( const std::string& name, const float* value )
     {
-      scan(input);
+      m_constants[name] = value;
     }
-
-    std::list<Token>* getTokens() { return &m_tokens; }
-
-    static void printTokens(std::list<Token>* tokens);
+    Token nextToken() { m_charPos++; m_token = scan(); return m_token; }
 
   private:
-    void scan(std::istream& input);
-    void scanString(std::istream& input);
-    void scanFloat(std::istream& input);
+    Token scan();
+    Token scanString();
+    Token scanFloat();
+
+    static float S_PI;
+    static float S_E;
+    static float S_LN2;
+    static float S_LN10;
 };
 
 #endif //LEXER_H

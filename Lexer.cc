@@ -7,151 +7,98 @@
 
 using namespace std;
 
-void Lexer::printTokens(list<Token>* tokens)
-{
-  list<Token>::const_iterator i = tokens->begin();
-  list<Token>::const_iterator end = tokens->end();
 
-  while (i != end) {
-    switch (i->type()) {
-      case VARX:
-        cout << " x " << flush;
-        break;
-      case VARY:
-        cout << " y " << flush;
-        break;
-      case VART:
-        cout << " t " << flush;
-        break;
-      case FLOAT:
-        cout << " " << i->expr()->result() << " " << flush;
-        break;
-      case PLUS:
-        cout << " + " << flush;
-        break;
-      case MINUS:
-      case NEGATIVE:
-        cout << " - " << flush;
-        break;
-      case MULT:
-        cout << " * " << flush;
-        break;
-      case DIV:
-        cout << " / " << flush;
-        break;
-      case POWER:
-        cout << " ^ " << flush;
-        break;
-      case LPAREN:
-        cout << " ( " << flush;
-        break;
-      case RPAREN:
-        cout << " ) " << flush;
-        break;
-      case COMMA:
-        cout << " , " << flush;
-        break;
-      case EXPR:
-        cout << " " << i->expr()->result() << " " << flush;
-        break;
-      case FUNCTION:
-        cout << static_cast<ExprFunction*>(i->expr())->name() << flush;
-        break;
-      default:
-        cerr << __func__ << "(): " << __LINE__ << ": Unknown token '" << i->type() << "'" << endl;
-    }
-    i++;
-  }
-  cout << endl;
-}
-
-void Lexer::scan(istream& input)
+Token Lexer::scan()
 {
-  while (input.good()) {
-    int in = input.get();
+  while (m_input->good()) {
+    int in = m_input->get();
 
     if (isalpha(in)) {
-      input.unget();
-      scanString(input);
+      m_input->unget();
+      return scanString();
     } else if (isdigit(in)) {
-      input.unget();
-      scanFloat(input);
+      m_input->unget();
+      return scanFloat();
     } else if (isspace(in)) {
       continue;
     } else {
       switch (in) {
         case '+':
-          m_tokens.push_back(Token(PLUS, new ExprBinOp(PLUS)));
-          break;
+          return Token(PLUS, m_charPos);
         case '-':
-          if (m_tokens.empty() ||
-              m_tokens.back().type() == LPAREN ||
-              m_tokens.back().type() == COMMA)
-            m_tokens.push_back(Token(NEGATIVE, new ExprUnaryOp(NEGATIVE)));
+          if (m_charPos == 0 ||
+              m_token.m_type == LPAREN ||
+              m_token.m_type == COMMA)
+            return Token(NEGATIVE, m_charPos);
           else
-            m_tokens.push_back(Token(MINUS, new ExprBinOp(MINUS)));
-          break;
+            return Token(MINUS, m_charPos);
         case '*':
-          m_tokens.push_back(Token(MULT, new ExprBinOp(MULT)));
-          break;
+          return Token(MULT, m_charPos);
         case '/':
-          m_tokens.push_back(Token(DIV, new ExprBinOp(DIV)));
-          break;
+          return Token(DIV, m_charPos);
         case '^':
-          m_tokens.push_back(Token(POWER, new ExprBinOp(POWER)));
-          break;
+          return Token(POWER, m_charPos);
         case '(':
-          m_tokens.push_back(Token(LPAREN));
-          break;
+          return Token(LPAREN, m_charPos);
         case ')':
-          m_tokens.push_back(Token(RPAREN));
-          break;
+          return Token(RPAREN, m_charPos);
         case ',':
-          m_tokens.push_back(Token(COMMA));
-          break;
+          return Token(COMMA, m_charPos);
         default:
-          cerr << __func__ << "(): " << __LINE__ << ": Unknown input character '" << (char)in << "'" << endl;
+          cerr << "Warning: Unknown charachter '" << (char)in
+               << "' at position " << m_charPos << endl;
       }
     }
   }
+
+  return Token(END, m_charPos);
 }
 
-void Lexer::scanString(istream& input)
+Token Lexer::scanString()
 {
   int in;
   string name;
-  while (input.good()) {
-    in = input.get();
+  while (m_input->good()) {
+    in = m_input->get();
 
     if (isalnum(in)) {
       name += (char)in;
     } else {
-      input.unget();
+      m_input->unget();
       break;
     }
   }
 
-  if (name == "x")
-    m_tokens.push_back(Token(VARX, new ExprVariable(m_x)));
-  else if (name == "y")
-    m_tokens.push_back(Token(VARY, new ExprVariable(m_y)));
-  else if (name == "t")
-    m_tokens.push_back(Token(VART, new ExprVariable(m_t)));
-  else if (name == "pi")
-    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_PI)));
+  // Check if 'name' is a user constant
+  map<string,const float*>::const_iterator p_value;
+  p_value = m_constants.find( name );
+  if (p_value != m_constants.end())
+    return Token( *(p_value->second), m_charPos );
+
+  // Check if 'name' is a builtin constant
+  if (name == "pi")
+    return Token( &S_PI, m_charPos );
   else if (name == "e")
-    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_E)));
+    return Token( &S_E, m_charPos );
   else if (name == "ln2")
-    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_LN2)));
+    return Token( &S_LN2, m_charPos );
   else if (name == "ln10")
-    m_tokens.push_back(Token(FLOAT, new ExprLiteral(M_LN10)));
-  else
-    m_tokens.push_back(Token(FUNCTION, new ExprFunction(name)));
+    return Token( &S_LN10, m_charPos );
+  else if (Function::isNameValid(name)) // Check for a function name
+    return Token( Function::nameToID(name), m_charPos );
+  else // We don't support anything else right now...
+    throw 100;
 }
 
-void Lexer::scanFloat(istream& input)
+Token Lexer::scanFloat()
 {
   float number;
-  input >> number;
-  m_tokens.push_back(Token(FLOAT, new ExprLiteral(number)));
+  *m_input >> number;
+
+  return Token( number, m_charPos );
 }
+
+float Lexer::S_PI    = M_PI;
+float Lexer::S_E     = M_E;
+float Lexer::S_LN2   = M_LN2;
+float Lexer::S_LN10  = M_LN10;

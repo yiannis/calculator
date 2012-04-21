@@ -1,40 +1,74 @@
-#include <list>
+#ifndef PARSER_H
+#define PARSER_H
+
 #include <map>
+#include <exception>
+#include <sstream>
 
 #include "Lexer.h"
 #include "Expr.h"
+#include "Token.h"
+
 
 class Parser {
   private:
-    std::list<Token>* m_tokens;
-    std::list<Token>::iterator m_item;
-    bool m_parseOK;
+    Lexer *m_lexer;
+    Token m_token;
+    ExprBase *m_ast;
 
   public:
-    Parser(std::list<Token>* tokens) : m_tokens(tokens), m_parseOK(true)
+    Parser(Lexer *lexer) :
+      m_lexer(lexer), m_token(END, -1), m_ast(NULL) 
     {
-      m_item = m_tokens->begin();
-      parseTokens();
+      next();
+      m_ast = parseExpression();
     }
 
-    ExprBase* getAST() { return m_tokens->front().expr(); }
-
-    bool OK() const { return m_parseOK; }
+    const ExprBase* AST() const { return m_ast; }
 
     static std::map<TokenType,int> Precedence;
 
   private:
-    bool itemIsOp();
-    bool itemIsBinOp();
-    bool itemIsUnaryOp();
-    bool itemIsFunc();
+    void next();
 
-    bool parseFunc();
-    bool parseUnaryOp();
-    bool parseBinOp();
+    ExprBase *parseFunction();
+    ExprBase *parseUnaryOp();
+    ExprBase *parseBinaryOp( ExprBase *left );
+    ExprBase *parseNumber();
+    ExprBase *parseExpression();
 
-    void eraseEnclosingParen();
-    void parseTokens();
-    void nextOpItem();
-    int tokenPos();
+    bool isKnownFunction();
+    bool isLParen();
+    bool isRParen();
+    bool isComma();
+    bool isUnaryOp();
+    bool isBinaryOp();
+    bool isNumber();
+    bool isFunction();
+    bool isEnd();
+
+    void error( const std::string& message ) const;
 };
+
+class ParseError : public std::exception
+{
+  public:
+    ParseError( const Token& token, const std::string& message )
+    {
+      std::ostringstream msg(m_message);
+      msg << "parse error: "
+          << token.m_pos << ": " << token.toString()
+          << ": " << message;
+    }
+
+    virtual const char* what() const throw()
+    {
+      return m_message.c_str();
+    }
+    virtual ~ParseError() throw() {}
+
+  private:
+    std::string m_message;
+};
+
+#endif //PARSER_H

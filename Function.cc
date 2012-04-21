@@ -108,3 +108,36 @@ float Function::call(Function::ID id, float arg1, float arg2)
       throw 2;
   }
 }
+
+bool Function::isNameValid( const std::string& name )
+{
+  Function::ID id = nameToID( name );
+
+  if (id >= SIN && id < UNKNOWN)
+    return true;
+  else
+    return false;
+}
+
+int *Function::fillNumArguments()
+{
+  int *numArgs = new int[NUM_FUNCTIONS];
+
+  numArgs[SIN]    = 1;
+  numArgs[COS]    = 1;
+  numArgs[TAN]    = 1;
+  numArgs[ACOS]   = 1;
+  numArgs[ASIN]   = 1;
+  numArgs[ATAN]   = 1;
+  numArgs[EXP]    = 1;
+  numArgs[LOG]    = 1;
+  numArgs[LOG10]  = 1;
+  numArgs[SQRT]   = 1;
+
+  numArgs[POW]    = 2;
+  numArgs[ATAN2]  = 2;
+
+  return numArgs;
+}
+
+int *Function::numArguments = fillNumArguments();
