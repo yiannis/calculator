@@ -1,8 +1,13 @@
 #include "Parser.h"
 
-#include <iostream>
+#include <cstdio>
 //#define DBG std::cerr << __FILE__ ": " << __LINE__ << ": " << __func__ << "()" << std::endl;
-#define DBG std::cerr << __LINE__ << ": " << __func__ << "()" << std::endl;
+//#define DBG std::cerr << __LINE__ << ": " << __func__ << "()" << std::endl;
+//#define BEGIN std::cerr << __func__ << "()" << " {" << std::endl;
+//#define END std::cerr << __func__ << "()" << " }" << std::endl;
+#define B_ printf( "%s(%d:'%s') {\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
+#define E_ printf( "%s(%d:'%s') }\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
+
 void Parser::error( const std::string& message ) const
 {
   throw ParseError( m_token, message );
@@ -14,7 +19,7 @@ void Parser::next()
 }
 
 ExprBase *Parser::parseFunction()
-{ DBG
+{ B_
   if (!isFunction())
     error( "Expected a function" );
 
@@ -52,19 +57,20 @@ ExprBase *Parser::parseFunction()
   } else {
     error( "Expected ')'" );
   }
-DBG
+E_
   return func;
 }
 
 ExprBase *Parser::parseUnaryOp()
 { // FIXME This is for prefix operators only
+ B_ 
   if (!isUnaryOp())
     error( "Expected a unary operator" );
 
   ExprUnaryOp *op = new ExprUnaryOp( m_token );
 
   next(); // Consume operator
-  ExprBase *expr = parseExpression();
+  ExprBase *expr = parseExpression(false);
   next();
   if (isBinaryOp()) {
     if (Precedence[m_token.m_type] > Precedence[op->type()])
@@ -75,21 +81,21 @@ ExprBase *Parser::parseUnaryOp()
     }
   } else
       op->setArg( expr );
-
+E_
   return op;
 }
 
 ExprBase *Parser::parseBinaryOp( ExprBase *left )
-{ DBG
+{ B_
   if (!isBinaryOp())
     error( "Expected a binary operator" );
 
   ExprBinOp *op = new ExprBinOp( m_token );
 
   next(); // Consume operator
-  ExprBase *right = parseExpression();
+  ExprBase *right = parseExpression(false);
   next(); // Get next token
-  
+
   // 3+5*2
   // 3*5+2
   if (isBinaryOp()) {
@@ -101,12 +107,12 @@ ExprBase *Parser::parseBinaryOp( ExprBase *left )
     }
   } else
     op->setArgs( left, right );
-DBG
+E_
   return op;
 }
 
 ExprBase *Parser::parseNumber()
-{
+{ B_
   ExprBase *num = NULL;
   switch (m_token.m_type) {
     case CONSTANT:
@@ -121,12 +127,12 @@ ExprBase *Parser::parseNumber()
       error( "Expected a constant or literal" );
       break;
   }
-
+E_
   return num;
 }
 
-ExprBase *Parser::parseExpression()
-{DBG
+ExprBase *Parser::parseExpression( bool greedy )
+{ B_
   ExprBase *expr = NULL;
 
   if (isLParen()) {
@@ -137,7 +143,7 @@ ExprBase *Parser::parseExpression()
     else
       error( "Expected ')'" );
 
-    next(); // Get next token
+//    next(); // Get next token
   } else if (isNumber()) {
     expr = parseNumber();
   } else if (isFunction()) {
@@ -146,11 +152,13 @@ ExprBase *Parser::parseExpression()
     expr = parseUnaryOp();
   }
 
-  if (isBinaryOp()) {
-    return parseBinaryOp( expr );
-  } else if (!(isRParen() || isComma() || isEnd()))
-    error( "Expected ')' or ',' or EOF" );
-DBG
+  if (greedy) {
+    if (isBinaryOp()) {
+      return parseBinaryOp( expr );
+    } else if (!(isRParen() || isComma() || isEnd()))
+      error( "Expected ')' or ',' or EOF" );
+  }
+E_
   return expr;
 }
 

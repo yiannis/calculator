@@ -35,7 +35,7 @@ class Parser {
     ExprBase *parseUnaryOp();
     ExprBase *parseBinaryOp( ExprBase *left );
     ExprBase *parseNumber();
-    ExprBase *parseExpression();
+    ExprBase *parseExpression(bool greedy = true);
 
     bool isKnownFunction();
     bool isLParen();
