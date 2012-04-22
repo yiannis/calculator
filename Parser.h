@@ -31,13 +31,11 @@ class Parser {
   private:
     void next();
 
-    ExprBase *parseFunction();
-    ExprBase *parseUnaryOp();
-    ExprBase *parseBinaryOp( ExprBase *left );
+    ExprBase *parseExpression();
+    ExprBase *parseBasicExpression();
     ExprBase *parseNumber();
-    ExprBase *parseExpression(bool greedy = true);
+    ExprBase *parseFunction();
 
-    bool isKnownFunction();
     bool isLParen();
     bool isRParen();
     bool isComma();

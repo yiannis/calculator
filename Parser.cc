@@ -18,6 +18,57 @@ void Parser::next()
   m_token = m_lexer->nextToken();
 }
 
+ExprBase *Parser::parseBasicExpression()
+{
+  ExprBase *result = NULL;
+
+  if (isNumber()) {
+    result = parseNumber();
+  } else if (isLParen()) {
+    next(); // Consume '('
+    result = parseExpression();
+    if (!isRParen()) error( "Expected ')'" );
+  } else if (isFunction()) {
+    result = parseFunction();
+  } else if (isUnaryOp()) {
+    ExprUnaryOp *op = new ExprUnaryOp( m_token );
+    next(); // Consume '-'
+    op->setArg( parseBasicExpression() );
+    result = op;
+  }
+
+  return result;
+}
+
+ExprBase *Parser::parseExpression()
+{ // 3 + 2 * 5 + 1
+  ExprBase *result = parseBasicExpression();
+
+  while (isBinaryOp()) {
+    TokenType opLeft = m_token.m_type;
+    ExprBase *leftExpr = result;
+    ExprBinOp *leftBinOp = new ExprBinOp( m_token );
+
+    next(); // Consume opLeft
+    ExprBase *rightExpr = parseBasicExpression();
+
+    if (isBinaryOp()) {
+      TokenType opRight = m_token.m_type;
+      if (Precedence[opRight] > Precedence[opLeft]) {
+        ExprBinOp *rightBinOp = new ExprBinOp( m_token );
+        next(); // Consume opRight
+        rightBinOp->setArgs( rightExpr, parseBasicExpression() );
+        leftBinOp->setArgs( leftExpr, rightBinOp );
+      }
+    } else
+      leftBinOp->setArgs( leftExpr, rightExpr );
+
+    result = leftBinOp;
+    }
+
+  return result;
+}
+
 ExprBase *Parser::parseFunction()
 { B_
   if (!isFunction())
@@ -26,7 +77,7 @@ ExprBase *Parser::parseFunction()
   Function::ID funcID = m_token.m_data.id;
 
   ExprFunction *func = new ExprFunction( m_token );
-  next(); // Get '('
+  next(); // Consume function name
   if (!isLParen())
     error( "Expected '('" );
   next(); // Consume '('
@@ -61,56 +112,6 @@ E_
   return func;
 }
 
-ExprBase *Parser::parseUnaryOp()
-{ // FIXME This is for prefix operators only
- B_ 
-  if (!isUnaryOp())
-    error( "Expected a unary operator" );
-
-  ExprUnaryOp *op = new ExprUnaryOp( m_token );
-
-  next(); // Consume operator
-  ExprBase *expr = parseExpression(false);
-  next();
-  if (isBinaryOp()) {
-    if (Precedence[m_token.m_type] > Precedence[op->type()])
-      op->setArg( parseBinaryOp( expr ) );
-    else {
-      op->setArg( expr );
-      return parseBinaryOp( op );
-    }
-  } else
-      op->setArg( expr );
-E_
-  return op;
-}
-
-ExprBase *Parser::parseBinaryOp( ExprBase *left )
-{ B_
-  if (!isBinaryOp())
-    error( "Expected a binary operator" );
-
-  ExprBinOp *op = new ExprBinOp( m_token );
-
-  next(); // Consume operator
-  ExprBase *right = parseExpression(false);
-  next(); // Get next token
-
-  // 3+5*2
-  // 3*5+2
-  if (isBinaryOp()) {
-    if (Precedence[m_token.m_type] > Precedence[op->type()])
-      op->setArgs( left, parseBinaryOp( right ) );
-    else {
-      op->setArgs( left, right );
-      return parseBinaryOp( op );
-    }
-  } else
-    op->setArgs( left, right );
-E_
-  return op;
-}
-
 ExprBase *Parser::parseNumber()
 { B_
   ExprBase *num = NULL;
@@ -129,37 +130,6 @@ ExprBase *Parser::parseNumber()
   }
 E_
   return num;
-}
-
-ExprBase *Parser::parseExpression( bool greedy )
-{ B_
-  ExprBase *expr = NULL;
-
-  if (isLParen()) {
-    next(); // Consume '('
-    expr = parseExpression();
-    if (isRParen())
-      next(); // Consume ')'
-    else
-      error( "Expected ')'" );
-
-//    next(); // Get next token
-  } else if (isNumber()) {
-    expr = parseNumber();
-  } else if (isFunction()) {
-    expr = parseFunction();
-  } else if (isUnaryOp()) {
-    expr = parseUnaryOp();
-  }
-
-  if (greedy) {
-    if (isBinaryOp()) {
-      return parseBinaryOp( expr );
-    } else if (!(isRParen() || isComma() || isEnd()))
-      error( "Expected ')' or ',' or EOF" );
-  }
-E_
-  return expr;
 }
 
 bool Parser::isEnd()
