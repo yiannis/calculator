@@ -11,7 +11,7 @@ class Test: public QObject
   Q_OBJECT
 
     private:
-      Executor m_code;
+      float m_x, m_y, m_t;
 
     private slots:
       void initTestCase();

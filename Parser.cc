@@ -1,10 +1,7 @@
 #include "Parser.h"
 
 #include <cstdio>
-//#define DBG std::cerr << __FILE__ ": " << __LINE__ << ": " << __func__ << "()" << std::endl;
-//#define DBG std::cerr << __LINE__ << ": " << __func__ << "()" << std::endl;
-//#define BEGIN std::cerr << __func__ << "()" << " {" << std::endl;
-//#define END std::cerr << __func__ << "()" << " }" << std::endl;
+
 #define B_ printf( "%s(%d:'%s') {\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
 #define E_ printf( "%s(%d:'%s') }\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
 
@@ -26,8 +23,12 @@ ExprBase *Parser::parseBasicExpression()
     result = parseNumber();
   } else if (isLParen()) {
     next(); // Consume '('
-    result = parseExpression();
+    if (isLParen())
+      result = parseBasicExpression();
+    else
+      result = parseExpression();
     if (!isRParen()) error( "Expected ')'" );
+    next(); // Consume ')'
   } else if (isFunction()) {
     result = parseFunction();
   } else if (isUnaryOp()) {
