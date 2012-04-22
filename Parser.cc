@@ -41,7 +41,7 @@ ExprBase *Parser::parseBasicExpression()
 }
 
 ExprBase *Parser::parseExpression()
-{ // 3 + 2 * 5 + 1
+{ // 3 + 2 * 5 + 1 // 3 * 2 - 1
   ExprBase *result = parseBasicExpression();
 
   while (isBinaryOp()) {
@@ -59,9 +59,12 @@ ExprBase *Parser::parseExpression()
         next(); // Consume opRight
         rightBinOp->setArgs( rightExpr, parseBasicExpression() );
         leftBinOp->setArgs( leftExpr, rightBinOp );
+      } else {
+        leftBinOp->setArgs( leftExpr, rightExpr );
       }
-    } else
+    } else {
       leftBinOp->setArgs( leftExpr, rightExpr );
+    }
 
     result = leftBinOp;
     }

@@ -27,6 +27,7 @@ class ExprBase {
     virtual float result() const = 0;
 
     void error( const std::string& message ) const;
+    void error( bool condition, const std::string& message ) const;
 };
 
 class ExprLiteral : public ExprBase {
