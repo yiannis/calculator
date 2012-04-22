@@ -1,13 +1,24 @@
-#include "Parser.h"
-
 #include <cstdio>
 
-#define B_ printf( "%s(%d:'%s') {\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
-#define E_ printf( "%s(%d:'%s') }\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
+#include "Parser.h"
+
+#ifdef DEBUG
+  #define B_ printf( "%s(%d:'%s') {\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
+  #define E_ printf( "%s(%d:'%s') }\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);
+#else
+  #define B_
+  #define E_
+#endif
 
 void Parser::error( const std::string& message ) const
 {
   throw ParseError( m_token, message );
+}
+
+void Parser::error( bool condition, const std::string& message ) const
+{
+  if (condition)
+    throw ParseError( m_token, message );
 }
 
 void Parser::next()
@@ -22,13 +33,7 @@ ExprBase *Parser::parseBasicExpression()
   if (isNumber()) {
     result = parseNumber();
   } else if (isLParen()) {
-    next(); // Consume '('
-    if (isLParen())
-      result = parseBasicExpression();
-    else
-      result = parseExpression();
-    if (!isRParen()) error( "Expected ')'" );
-    next(); // Consume ')'
+    result = parseParenthesis();
   } else if (isFunction()) {
     result = parseFunction();
   } else if (isUnaryOp()) {
@@ -41,9 +46,9 @@ ExprBase *Parser::parseBasicExpression()
   return result;
 }
 
-ExprBase *Parser::parseExpression()
-{ // 3 + 2 * 5 + 1 // 3 * 2 - 1
-  ExprBase *result = parseBasicExpression();
+ExprBase *Parser::parseExpression( ExprBase *expr )
+{
+  ExprBase *result = expr ? expr : parseBasicExpression();
 
   while (isBinaryOp()) {
     TokenType opLeft = m_token.m_type;
@@ -69,6 +74,35 @@ ExprBase *Parser::parseExpression()
 
     result = leftBinOp;
     }
+
+  return result;
+}
+
+ExprBase *Parser::parseParenthesis()
+{
+  bool close;
+  ExprBase *result = NULL;
+
+  next(); // Consume '('
+  if (isLParen()) {
+    result = parseParenthesis();
+    close = false;
+  } else {
+    result = parseExpression();
+    close = true;
+  }
+
+  if (close) {
+    error( !isRParen(), "Expected ')'" );
+    next(); // Consume ')'
+  } else if (isBinaryOp()) {
+    result = parseExpression( result );
+    error( !isRParen(), "Expected ')'" );
+    next(); // Consume ')'
+  } else {
+    error( !isRParen(), "Expected ')'" );
+    next(); // Consume ')'
+  }
 
   return result;
 }

@@ -32,7 +32,7 @@ class Lexer {
     void get()
     {
       if (m_input->good()) {
-        m_in = m_input->get(); m_charPos++; printPos();
+        m_in = m_input->get(); m_charPos++; // printPos();
       }
     }
     void unget()

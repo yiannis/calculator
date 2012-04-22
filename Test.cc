@@ -1,4 +1,5 @@
 #include <sstream>
+#include <iostream>
 
 #include <QString>
 
@@ -31,6 +32,8 @@ void Test::parserTest()
 {
   QFETCH(QString, function);
   QFETCH(float, result);
+
+  cerr << function.toUtf8().constData() << endl;
 
   istringstream input(function.toUtf8().constData());
 

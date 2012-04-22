@@ -31,8 +31,9 @@ class Parser {
   private:
     void next();
 
-    ExprBase *parseExpression();
+    ExprBase *parseExpression( ExprBase *expr = NULL );
     ExprBase *parseBasicExpression();
+    ExprBase *parseParenthesis();
     ExprBase *parseNumber();
     ExprBase *parseFunction();
 
@@ -46,6 +47,7 @@ class Parser {
     bool isEnd();
 
     void error( const std::string& message ) const;
+    void error( bool condition, const std::string& message ) const;
 };
 
 class ParseError : public std::exception
