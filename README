@@ -1,6 +1,10 @@
 This is just an experiment, to write a simple parser for arithmetic expressions.
-The Lexer just reads the full input into a list of Tokens.
-Then the Parser creates an AST, using some non-recursive parse functions.
+
+A Lexer class is used to scan the input and feed the Parser class with Tokens.
+The Parser then creates an Abstract Syntax Tree, using the ExprBase and decendents class.
+A Visitor class is used to traverse the AST and execute the code.
+The Lexer supports adding named constants. There are also some builtin constants supported,
+plus a few functions.
 
 Compile:
 $ cmake .
@@ -10,13 +14,10 @@ If you have qt-devel libraries, tests will also be created:
 $ ./test
 
 Usage:
-$ ./calculator "math-expression" x y t
+$ ./calculator "math-expression" [<var1> <value1>] [<var2> <value2>] [<var3> <value3>]
+E.g:
+$ ./calculator "x^2+y+sin(pi*t)" x 1 y 2 t 7
 
-The parser recognizes x,y,t variables and a few C math functions, eg:
-$ ./calculator "x+y+sin(t)" 4 5 2
-
-WARNING:
-This code is for testing purposes, not for production use!
 
 --
 Copyright 2012 Yiannis Belias
