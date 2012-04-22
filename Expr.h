@@ -118,10 +118,11 @@ class ExprError : public std::exception
   public:
     ExprError( const ExprBase* expr, const std::string& message )
     {
-      std::ostringstream msg(m_message);
-      msg << "expr error: "
-          << expr->position() << ": " << expr->toString()
-          << ": " << message;
+      std::ostringstream print;
+      print << "expr error: "
+            << expr->position() << ": " << expr->toString()
+            << ": " << message;
+      m_message = print.str();
     }
 
     virtual const char* what() const throw()

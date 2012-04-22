@@ -55,10 +55,12 @@ class ParseError : public std::exception
   public:
     ParseError( const Token& token, const std::string& message )
     {
-      std::ostringstream msg(m_message);
-      msg << "parse error: "
-          << token.m_pos << ": " << token.toString()
-          << ": " << message;
+      std::ostringstream print;
+      print << "parse error: "
+            << token.m_pos << ": "
+            << token.toString()<< ": "
+            << message;
+      m_message = print.str();
     }
 
     virtual const char* what() const throw()

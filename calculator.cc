@@ -14,11 +14,12 @@ int main(int argc, char* argv[])
 {
   int error = 0;
   map<string,float> constants;
+  string source;
 
   if (argc == 1)
     return 1;
   if (argc >= 2)
-    string source = argv[1];
+    source = argv[1];
   if (argc >= 4)
     constants[argv[2]] = atof(argv[3]);
   if (argc >= 6)
@@ -26,7 +27,6 @@ int main(int argc, char* argv[])
   if (argc > 8)
     constants[argv[6]] = atof(argv[7]);
 
-  string source;
   istringstream input(source);
 
   cout << source << endl;
@@ -41,10 +41,10 @@ int main(int argc, char* argv[])
     Parser parser(&lexer);
 
     if (parser.AST()) {
-      cout << parser.AST()->result() << endl;
+      cout << " = " << parser.AST()->result() << endl;
     }
   } catch (ParseError e) {
-    cerr << e.what();
+    cerr << e.what() << endl;
     error = 1;
   }
 

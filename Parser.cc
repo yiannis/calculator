@@ -1,5 +1,8 @@
 #include "Parser.h"
 
+#include <iostream>
+//#define DBG std::cerr << __FILE__ ": " << __LINE__ << ": " << __func__ << "()" << std::endl;
+#define DBG std::cerr << __LINE__ << ": " << __func__ << "()" << std::endl;
 void Parser::error( const std::string& message ) const
 {
   throw ParseError( m_token, message );
@@ -11,7 +14,7 @@ void Parser::next()
 }
 
 ExprBase *Parser::parseFunction()
-{
+{ DBG
   if (!isFunction())
     error( "Expected a function" );
 
@@ -21,13 +24,13 @@ ExprBase *Parser::parseFunction()
   next(); // Get '('
   if (!isLParen())
     error( "Expected '('" );
+  next(); // Consume '('
 
   int argc = Function::numArguments[funcID];
   ExprBase *argv[MAX_FUNCTION_ARGUMENTS] = {NULL};
   for (int arg=0; arg<argc; arg++) {
     argv[arg] = parseExpression();
 
-    next();
     switch (m_token.m_type) {
       case COMMA:
         next(); // Consume ','
@@ -41,7 +44,6 @@ ExprBase *Parser::parseFunction()
         break;
     }
   }
-  next(); // Get expected ')'
 
   if (isRParen()) {
     next(); // Consume ')'
@@ -50,7 +52,7 @@ ExprBase *Parser::parseFunction()
   } else {
     error( "Expected ')'" );
   }
-
+DBG
   return func;
 }
 
@@ -78,7 +80,7 @@ ExprBase *Parser::parseUnaryOp()
 }
 
 ExprBase *Parser::parseBinaryOp( ExprBase *left )
-{
+{ DBG
   if (!isBinaryOp())
     error( "Expected a binary operator" );
 
@@ -99,7 +101,7 @@ ExprBase *Parser::parseBinaryOp( ExprBase *left )
     }
   } else
     op->setArgs( left, right );
-
+DBG
   return op;
 }
 
@@ -124,7 +126,7 @@ ExprBase *Parser::parseNumber()
 }
 
 ExprBase *Parser::parseExpression()
-{
+{DBG
   ExprBase *expr = NULL;
 
   if (isLParen()) {
@@ -134,6 +136,8 @@ ExprBase *Parser::parseExpression()
       next(); // Consume ')'
     else
       error( "Expected ')'" );
+
+    next(); // Get next token
   } else if (isNumber()) {
     expr = parseNumber();
   } else if (isFunction()) {
@@ -142,33 +146,32 @@ ExprBase *Parser::parseExpression()
     expr = parseUnaryOp();
   }
 
-  next();
   if (isBinaryOp()) {
     return parseBinaryOp( expr );
-  } else if (!isRParen() || !isComma() || !isEnd())
-    error( "Expected ')' or ','" );
-
+  } else if (!(isRParen() || isComma() || isEnd()))
+    error( "Expected ')' or ',' or EOF" );
+DBG
   return expr;
 }
 
 bool Parser::isEnd()
 {
-  m_token.m_type == END ? true : false;
+  return m_token.m_type == END;
 }
 
 bool Parser::isComma()
 {
-  m_token.m_type == COMMA ? true : false;
+  return m_token.m_type == COMMA;
 }
 
 bool Parser::isLParen()
 {
-  m_token.m_type == LPAREN ? true : false;
+  return m_token.m_type == LPAREN;
 }
 
 bool Parser::isRParen()
 {
-  m_token.m_type == RPAREN ? true : false;
+  return m_token.m_type == RPAREN;
 }
 
 bool Parser::isUnaryOp()
@@ -200,7 +203,7 @@ bool Parser::isNumber()
 
 bool Parser::isFunction()
 {
-  m_token.m_type == FUNCTION ? true : false;
+  return m_token.m_type == FUNCTION;
 }
 
 std::map<TokenType,int> initPrecedenceMap()

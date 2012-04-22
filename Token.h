@@ -63,17 +63,19 @@ struct Token {
     std::string toString() const
     {
       std::string str;
-      std::ostringstream out(str);
+      std::ostringstream out;
 
       switch (m_type) {
         case FUNCTION:
           str = Function::IDtoName( m_data.id );
           break;
         case FLOAT:
-          out << m_data.value;
+          out << "(" << m_data.value << ")";
+          str = out.str();
           break;
         case CONSTANT:
-          out << m_data.pValue;
+          out << "(" << *(m_data.pValue) << ")";
+          str = out.str();
           break;
         default:
           str = tokenToString(m_type);

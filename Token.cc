@@ -8,15 +8,20 @@ using namespace std;
 const std::string Token::tokenToString(TokenType t)
 {
   switch (t) {
+    case CONSTANT:
+      return "<const>";
     case FLOAT:
       return "<float>";
     case EXPR:
       return "<expr>";
-    case PLUS:
-      return "+";
+    case FACTORIAL:
+      return "!";
     case MINUS:
     case NEGATIVE:
       return "-";
+    case PLUS:
+    case POSITIVE:
+      return "+";
     case MULT:
       return "*";
     case DIV:
@@ -31,6 +36,8 @@ const std::string Token::tokenToString(TokenType t)
       return ")";
     case COMMA:
       return ",";
+    case END:
+      return "<eof>";
     default:
       return "unknown";
   }

@@ -2,27 +2,30 @@
 #include <string>
 #include <cctype>
 #include <cmath>
+#include <cstdlib>
 
 #include "Lexer.h"
 
+#include <iostream>
+#define DBG std::cerr << __FILE__ ": " << __LINE__ << ": " << __func__ << "()" << std::endl;
 using namespace std;
 
 
 Token Lexer::scan()
 {
+  get();
   while (m_input->good()) {
-    int in = m_input->get();
-
-    if (isalpha(in)) {
-      m_input->unget();
+    if (isalpha(m_in)) {
+      unget();
       return scanString();
-    } else if (isdigit(in)) {
-      m_input->unget();
+    } else if (isdigit(m_in)) {
+      unget();
       return scanFloat();
-    } else if (isspace(in)) {
+    } else if (isspace(m_in)) {
+      get();
       continue;
     } else {
-      switch (in) {
+      switch (m_in) {
         case '+':
           return Token(PLUS, m_charPos);
         case '-':
@@ -45,8 +48,9 @@ Token Lexer::scan()
         case ',':
           return Token(COMMA, m_charPos);
         default:
-          cerr << "Warning: Unknown charachter '" << (char)in
+          cerr << "Warning: Unknown charachter '" << (char)m_in
                << "' at position " << m_charPos << endl;
+          get();
       }
     }
   }
@@ -56,15 +60,14 @@ Token Lexer::scan()
 
 Token Lexer::scanString()
 {
-  int in;
   string name;
-  while (m_input->good()) {
-    in = m_input->get();
+  while (m_input->good()) { //FIXME
+    get();
 
-    if (isalnum(in)) {
-      name += (char)in;
+    if (isalnum(m_in)) {
+      name += (char)m_in;
     } else {
-      m_input->unget();
+      unget();
       break;
     }
   }
@@ -91,12 +94,44 @@ Token Lexer::scanString()
 }
 
 Token Lexer::scanFloat()
-{
-  float number;
-  *m_input >> number;
+{ // X[X]*[.?X[X]*]
+  string number;
 
-  return Token( number, m_charPos );
+  // Integral part
+  get();
+  int pos = m_charPos;
+  do {
+    if (isdigit(m_in))
+      number += (char)m_in;
+    else
+      break;
+
+    get();
+  } while (m_input->good());
+
+  if (m_input->good() && m_in == '.') {
+    // separator
+    number += '.';
+
+    // Fractional part
+    get();
+    while (m_input->good()) {
+      if (isdigit(m_in))
+        number += (char)m_in;
+      else
+        break;
+
+      get();
+    }
+  }
+
+  if (m_input->good()) {
+    unget();
+  }
+
+  return Token( atof( number.c_str() ), m_charPos );
 }
+
 
 float Lexer::S_PI    = M_PI;
 float Lexer::S_E     = M_E;
