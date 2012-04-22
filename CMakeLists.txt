@@ -9,7 +9,8 @@ SET( PARSER_SOURCES
   "Function.cc"
   "Token.cc"
   "Lexer.cc"
-  "Parser.cc")
+  "Parser.cc"
+  "Visitor.cc")
 
 SET( TEST_H "Test.h" )
 

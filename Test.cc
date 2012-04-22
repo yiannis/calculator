@@ -1,5 +1,4 @@
 #include <sstream>
-#include <iostream>
 
 #include <QString>
 
@@ -33,8 +32,6 @@ void Test::parserTest()
   QFETCH(QString, function);
   QFETCH(float, result);
 
-  cerr << function.toUtf8().constData() << endl;
-
   istringstream input(function.toUtf8().constData());
 
   Lexer lexer(&input);
@@ -43,10 +40,11 @@ void Test::parserTest()
   lexer.pushConstant( string("t"), &m_t );
 
   Parser parser(&lexer);
+  ASTVisitorExecutor exec;
 
   QVERIFY( parser.AST() );
 
-  QCOMPARE( parser.AST()->result(), result );
+  QCOMPARE( parser.AST()->accept(&exec).f, result );
 }
 
 QTEST_MAIN(Test)

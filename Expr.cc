@@ -16,62 +16,56 @@ void ExprBase::error( bool condition, const std::string& message ) const
     throw ExprError( this, message );
 }
 
-float ExprUnaryOp::result() const
-{
-  error( m_expr == NULL, "No argument!" );
-  float expr = m_expr->result();
 
-  switch (type()) {
-    case NEGATIVE:
-      return -expr;
-    default:
-      error( "No such unary operator" );
-  }
+ASTdata ExprLiteral::accept( ASTVisitor *visitor ) const
+{
+  return visitor->visit( this );
 }
 
-float ExprBinOp::result() const
+ASTdata ExprConstant::accept( ASTVisitor *visitor ) const
+{
+  return visitor->visit( this );
+}
+
+ASTdata ExprUnaryOp::accept( ASTVisitor *visitor ) const
+{
+  error( m_expr == NULL, "No argument!" );
+  ASTdata data = m_expr->accept(visitor);
+
+  return visitor->visit( this, data );
+}
+
+ASTdata ExprBinOp::accept( ASTVisitor *visitor ) const
 {
   error( m_exprLeft == NULL, "No left argument!" );
   error( m_exprRight == NULL, "No right argument!" );
 
-  float l = m_exprLeft->result();
-  float r = m_exprRight->result();
+  ASTdata dataLeft = m_exprLeft->accept(visitor);
+  ASTdata dataRight = m_exprRight->accept(visitor);
 
-  switch (type()) {
-    case PLUS:
-      return l+r;
-    case MINUS:
-      return l-r;
-    case MULT:
-      return l*r;
-    case DIV:
-      return l/r;
-    case POWER:
-      return pow(l, r);
-    default:
-      error( "No such binary operator" );
-  }
+  return visitor->visit( this, dataLeft, dataRight );
 }
 
-float ExprFunction::result() const
+ASTdata ExprFunction::accept( ASTVisitor *visitor ) const
 {
-  float result = 0.0F;
+  ASTdata data0, data1;
   switch (m_numArgs) {
     case 0:
       error( "There's no function with 0 arguments" );
       break;
     case 1:
       error( m_argv[0] == NULL, "No first argument!" );
-      result = Function::call(m_token.m_data.id, m_argv[0]->result());
+      data0 = m_argv[0]->accept(visitor);
+      return visitor->visit( this, data0 );
       break;
     case 2:
       error( m_argv[0] == NULL, "No first argument!" );
       error( m_argv[1] == NULL, "No second argument!" );
-      result = Function::call(m_token.m_data.id, m_argv[0]->result(), m_argv[1]->result());
+      data0 = m_argv[0]->accept(visitor);
+      data1 = m_argv[1]->accept(visitor);
+      return visitor->visit( this, data0, data1 );
       break;
     default:
       error( "There's no function with more than 2 arguments" );
   }
-
-  return result;
 }

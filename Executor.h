@@ -21,7 +21,7 @@ class Executor {
     float* t_p() { return &m_t; }
 
     /// Execute the code on the AST
-    float run() { return m_tree->result(); }
+    //float run() { return m_tree->result(); }
 
   private:
     ExprBase* m_tree;

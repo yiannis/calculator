@@ -4,7 +4,8 @@
 #include <map>
 
 #include "Parser.h"
-#include "Lexer.h"
+#include "Parser.h"
+#include "Visitor.h"
 
 using namespace std;
 
@@ -41,7 +42,8 @@ int main(int argc, char* argv[])
     Parser parser(&lexer);
 
     if (parser.AST()) {
-      cout << " = " << parser.AST()->result() << endl;
+      ASTVisitorExecutor exec;
+      cout << "visitor = " << parser.AST()->accept(&exec).f << endl;
     }
   } catch (ParseError e) {
     cerr << e.what() << endl;

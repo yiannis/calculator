@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "Function.h"
+#include "Visitor.h"
 #include "Token.h"
 
 #define MAX_FUNCTION_ARGUMENTS 4
@@ -24,7 +25,7 @@ class ExprBase {
     int position() const { return m_token.m_pos; }
     std::string toString() const { return m_token.toString(); }
 
-    virtual float result() const = 0;
+    virtual ASTdata accept( ASTVisitor *visitor ) const = 0;
 
     void error( const std::string& message ) const;
     void error( bool condition, const std::string& message ) const;
@@ -37,8 +38,9 @@ class ExprLiteral : public ExprBase {
     {
       assert( m_token.m_type == FLOAT );
     }
+    float value() const { return m_token.m_data.value; }
 
-    virtual float result() const { return m_token.m_data.value; }
+    virtual ASTdata accept( ASTVisitor *visitor ) const;
 };
 
 class ExprConstant : public ExprBase {
@@ -48,8 +50,9 @@ class ExprConstant : public ExprBase {
     {
       assert( m_token.m_type == CONSTANT );
     }
+    float value() const { return *(m_token.m_data.pValue); }
 
-    virtual float result() const { return *(m_token.m_data.pValue); }
+    virtual ASTdata accept( ASTVisitor *visitor ) const;
 };
 
 class ExprUnaryOp : public ExprBase {
@@ -68,7 +71,7 @@ class ExprUnaryOp : public ExprBase {
       m_expr = expr;
     }
 
-    virtual float result() const;
+    virtual ASTdata accept( ASTVisitor *visitor ) const;
 };
 
 class ExprBinOp : public ExprBase {
@@ -91,7 +94,7 @@ class ExprBinOp : public ExprBase {
       m_exprRight = right;
     }
 
-    virtual float result() const ;
+    virtual ASTdata accept( ASTVisitor *visitor ) const;
 };
 
 class ExprFunction : public ExprBase {
@@ -109,6 +112,7 @@ class ExprFunction : public ExprBase {
         m_argv[i] = NULL;
     }
 
+    Function::ID id() const { return m_token.m_data.id; }
     void pushArg( ExprBase* arg )
     {
       assert( arg != NULL );
@@ -120,7 +124,7 @@ class ExprFunction : public ExprBase {
         error( "Asked to exceed maximum function arguments" );
     }
 
-    virtual float result() const;
+    virtual ASTdata accept( ASTVisitor *visitor ) const;
 };
 
 class ExprError : public std::exception
