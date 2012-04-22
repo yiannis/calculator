@@ -4,6 +4,7 @@
 #include <string>
 #include <cassert>
 #include <exception>
+#include <cassert>
 
 #include "Function.h"
 #include "Token.h"
@@ -61,7 +62,10 @@ class ExprUnaryOp : public ExprBase {
       assert( m_token.m_type == NEGATIVE );
     }
 
-    void setArg(ExprBase* expr) { m_expr = expr; }
+    void setArg(ExprBase* expr) {
+      assert( expr != NULL );
+      m_expr = expr;
+    }
 
     virtual float result() const;
 };
@@ -79,6 +83,9 @@ class ExprBinOp : public ExprBase {
 
     void setArgs(ExprBase* left, ExprBase* right)
     {
+      assert( left != NULL );
+      assert( right != NULL );
+
       m_exprLeft = left;
       m_exprRight = right;
     }
@@ -103,6 +110,8 @@ class ExprFunction : public ExprBase {
 
     void pushArg( ExprBase* arg )
     {
+      assert( arg != NULL );
+
       if (m_numArgs < MAX_FUNCTION_ARGUMENTS) {
         m_argv[m_numArgs] = arg;
         m_numArgs++;
