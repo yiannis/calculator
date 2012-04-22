@@ -1,10 +1,6 @@
 TODO
 0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
-1. Remove redundant parenthesis
-2. Make ExprBase() private and create a 'static ExprBase* ExprBase::create(TokenType)' factory
-3. Put setArgs() in ExprBase.
-   Does not help much. Should be put in a ExprBranch: public ExprBase
-4. Really use Exceptions, not just throw 'int'
+1. Really use Exceptions, not just throw 'int'
 
 - Add pi/e/... constants
 - Replace 'char m_op' with 'TokenType m_op' [OK]
