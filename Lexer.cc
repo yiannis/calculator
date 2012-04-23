@@ -73,10 +73,8 @@ Token Lexer::scanString()
   }
 
   // Check if 'name' is a user constant
-  map<string,const float*>::const_iterator p_value;
-  p_value = m_constants.find( name );
-  if (p_value != m_constants.end())
-    return Token( *(p_value->second), m_charPos );
+  if (m_constants.find( name ) != m_constants.end())
+    return Token( m_constants[name], m_charPos );
 
   // Check if 'name' is a builtin constant
   if (name == "pi")

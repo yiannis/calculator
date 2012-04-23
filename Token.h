@@ -54,7 +54,7 @@ struct Token {
   {
     m_data.value = value;
   }
-  Token( float *pvalue, int pos ) :
+  Token( const float *pvalue, int pos ) :
     m_type(CONSTANT), m_pos(pos)
   {
     m_data.pValue = pvalue;
@@ -91,7 +91,7 @@ struct Token {
   union {
     Function::ID id;
     float value;
-    float* pValue;
+    const float* pValue;
   } m_data;
 };
 
