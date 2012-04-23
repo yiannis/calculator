@@ -24,8 +24,16 @@ class Lexer {
       m_constants[name] = value;
     }
     Token nextToken() { m_tokenPos++; m_token = scan(); return m_token; }
+    /// Print for debugging
+    void print() const
+    {
+      for (I i=m_constants.begin(); i!=m_constants.end(); i++)
+        std::cout << i->first << ": " << *i->second << "@" << i->second << std::endl;
+    }
 
   private:
+    typedef std::map<std::string,const float*>::const_iterator I;
+
     void printPos() {
       std::cerr << "[" << m_charPos << "]: " << m_in << "(" << (char)m_in << ")" << std::endl;
     }

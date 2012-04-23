@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include <iostream>
+#include <cassert>
 
 #include "Visitor.h"
 #include "Parser.h"
@@ -10,7 +11,7 @@
 class Interpreter {
   public:
     Interpreter(std::istream *input) :
-      m_ready(false), m_lexer(new Lexer(input)), m_parser(NULL)
+      m_lexer(new Lexer(input)), m_parser(NULL)
     {}
 
     ~Interpreter()
@@ -41,23 +42,14 @@ class Interpreter {
 
       return m_constants[name];
     }
-    /// Parse the input and create the AST
-    bool parse()
-    {
-      m_parser = new Parser(m_lexer);
-      if (m_parser->AST() != NULL)
-        m_ready = true;
-      else
-        m_ready = false;
-      return m_ready;
-    }
     /// Execute the code on the AST
     float result()
     {
-      if (m_ready)
-        return m_parser->AST()->accept(&m_executor).f;
-      else
-        return 0;
+      if (!m_parser)
+        m_parser = new Parser(m_lexer);
+      assert( m_parser != NULL );
+
+      return m_parser->AST()->accept(&m_executor).f;
     }
     /// Show constants
     const std::map<std::string,float>& getConstantsTable() const { return m_constants; }
@@ -66,12 +58,12 @@ class Interpreter {
     {
       for (I i=m_constants.begin(); i!=m_constants.end(); i++)
         std::cout << i->first << ": " << i->second << "@" << &i->second << std::endl;
+      m_lexer->print();
     }
 
   private:
     typedef std::map<std::string,float>::const_iterator I;
 
-    bool m_ready;
     Lexer *m_lexer;
     Parser *m_parser;
     std::map<std::string,float> m_constants;

@@ -3,6 +3,14 @@
 
 #include "Expr.h"
 
+#ifdef DEBUG
+#  include <cstdio>
+#  define DBG fprintf(stderr, "%s(): %d\n", __func__, __LINE__ );
+#else
+#  define DBG
+#endif
+
+
 using namespace std;
 
 void ExprBase::error( const std::string& message ) const
@@ -69,3 +77,5 @@ ASTdata ExprFunction::accept( ASTVisitor *visitor ) const
       error( "There's no function with more than 2 arguments" );
   }
 }
+
+#undef DBG

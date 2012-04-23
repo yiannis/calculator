@@ -55,8 +55,6 @@ void Test::parserTest()
   engine["y"] =  3.0F;
   engine["t"] = -1.0F;
 
-  QVERIFY( engine.parse() );
-
   QCOMPARE( engine.result(), result );
 }
 
@@ -68,8 +66,6 @@ void Test::updateValuesTest()
   engine["x"] =  4.0F;
   engine["y"] =  2.0F;
   engine["z"] =  2.0F;
-
-  QVERIFY( engine.parse() );
 
   QCOMPARE( engine.result(), 16.0F );
 
