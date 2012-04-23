@@ -1,6 +1,7 @@
 TODO
 0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
 1. Really use Exceptions, not just throw 'int'
+2. Create destructors for ExprBase, etc and Parser!!!
 
 - Add pi/e/... constants
 - Replace 'char m_op' with 'TokenType m_op' [OK]

@@ -3,9 +3,7 @@
 #include <cstdlib>
 #include <map>
 
-#include "Parser.h"
-#include "Parser.h"
-#include "Visitor.h"
+#include "Interpreter.h"
 
 using namespace std;
 
@@ -14,38 +12,33 @@ typedef map<string,float>::const_iterator iter;
 int main(int argc, char* argv[])
 {
   int error = 0;
-  map<string,float> constants;
   string source;
 
-  if (argc == 1)
+  if (argc == 1) {
+    cerr << "Usage: " << argv[0] << "<math-expression> [<var1> <value1>] [<var2> <value2>] ..." << endl;
     return 1;
-  if (argc >= 2)
+  } else {
     source = argv[1];
-  if (argc >= 4)
-    constants[argv[2]] = atof(argv[3]);
-  if (argc >= 6)
-    constants[argv[4]] = atof(argv[5]);
-  if (argc > 8)
-    constants[argv[6]] = atof(argv[7]);
+  }
 
   istringstream input(source);
+  Interpreter engine(&input);
 
-  cout << source << endl;
-  for (iter i=constants.begin(); i!=constants.end(); i++)
-    cout << i->first << " = " << i->second << endl;
+  int args_left = argc-2;
+  int pairs = args_left/2;
+  int end = 2 + 2*pairs;
+  for (int arg=2; arg<end; arg+=2)
+    engine.set( argv[arg], atof(argv[arg+1]) );
+
+  for (iter i=engine.getConstantsTable().begin(); i!=engine.getConstantsTable().end(); i++)
+    cout << i->first << " = " << i->second << ", ";
+  cout << "\n" << source;
 
   try {
-    Lexer lexer(&input);
-    for (iter i=constants.begin(); i!=constants.end(); i++)
-      lexer.pushConstant( i->first, &(i->second) );
-
-    Parser parser(&lexer);
-
-    if (parser.AST()) {
-      ASTVisitorExecutor exec;
-      cout << "visitor = " << parser.AST()->accept(&exec).f << endl;
+    if (engine.run()) {
+      cout << " = " << engine.result() << endl;
     }
-  } catch (ParseError e) {
+  } catch (exception& e) {
     cerr << e.what() << endl;
     error = 1;
   }

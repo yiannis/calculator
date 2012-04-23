@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "Parser.h"
+#include "Expr.h"
 
 #ifdef DEBUG
   #define B_ printf( "%s(%d:'%s') {\n", __func__, m_token.m_pos, m_token.toString().c_str() ); fflush(NULL);

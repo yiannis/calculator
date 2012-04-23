@@ -2,16 +2,13 @@
 
 #include <QString>
 
-#include "Parser.h"
+#include "Interpreter.h"
 #include "Test.h"
 
 using namespace std;
 
 void Test::initTestCase()
 {
-  m_x = 5;
-  m_y = 3;
-  m_t = -1;
 }
 
 void Test::parserTest_data()
@@ -34,17 +31,14 @@ void Test::parserTest()
 
   istringstream input(function.toUtf8().constData());
 
-  Lexer lexer(&input);
-  lexer.pushConstant( string("x"), &m_x );
-  lexer.pushConstant( string("y"), &m_y );
-  lexer.pushConstant( string("t"), &m_t );
+  Interpreter engine(&input);
+  engine.set( "x",  5.0F );
+  engine.set( "y",  3.0F );
+  engine.set( "t", -1.0F );
 
-  Parser parser(&lexer);
-  ASTVisitorExecutor exec;
+  QVERIFY( engine.run() );
 
-  QVERIFY( parser.AST() );
-
-  QCOMPARE( parser.AST()->accept(&exec).f, result );
+  QCOMPARE( engine.result(), result );
 }
 
 QTEST_MAIN(Test)
