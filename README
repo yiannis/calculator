@@ -14,7 +14,7 @@ If you have qt-devel libraries, tests will also be created:
 $ ./test
 
 Usage:
-$ ./calculator "math-expression" [<var1> <value1>] [<var2> <value2>] [<var3> <value3>]
+$ ./calculator "math-expression" [<var1> <value1>] [<var2> <value2>] ...
 E.g:
 $ ./calculator "x^2+y+sin(pi*t)" x 1 y 2 t 7
 
@@ -22,3 +22,8 @@ $ ./calculator "x^2+y+sin(pi*t)" x 1 y 2 t 7
 --
 Copyright 2012 Yiannis Belias
 Use under the GPLv3 or later, see COPYING. 
+--
+Yiannis Belias  <yiannisbe@gmail.com>              `
+Homepage [http://users.hol.gr/~jonnyb/video] '              .
+GNU+LINUX:                                            '           '
+In a world without fences who needs Gates?      .                     *
