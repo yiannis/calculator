@@ -34,7 +34,7 @@ class Interpreter {
       return *this;
     }
     /// Parse the input and create the AST
-    bool run()
+    bool parse()
     {
       m_parser = new Parser(m_lexer);
       if (m_parser->AST() != NULL)

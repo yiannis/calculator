@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   cout << "\n" << source;
 
   try {
-    if (engine.run()) {
+    if (engine.parse()) {
       cout << " = " << engine.result() << endl;
     }
   } catch (exception& e) {

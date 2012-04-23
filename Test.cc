@@ -36,7 +36,7 @@ void Test::parserTest()
   engine.set( "y",  3.0F );
   engine.set( "t", -1.0F );
 
-  QVERIFY( engine.run() );
+  QVERIFY( engine.parse() );
 
   QCOMPARE( engine.result(), result );
 }
