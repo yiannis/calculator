@@ -23,6 +23,7 @@ class Parser {
       next();
       m_ast = parseExpression();
     }
+    ~Parser() { delete m_ast; }
 
     const ExprBase* AST() const { return m_ast; }
 

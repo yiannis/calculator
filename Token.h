@@ -59,6 +59,7 @@ struct Token {
   {
     m_data.pValue = pvalue;
   }
+  ~Token() {}
 
   std::string toString() const
   {

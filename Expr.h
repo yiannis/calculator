@@ -12,6 +12,12 @@
 
 #define MAX_FUNCTION_ARGUMENTS 4
 
+#ifdef DEBUG
+#  include <cstdio>
+#  define DBG fprintf(stderr, "%s(): %d\n", __func__, __LINE__ );
+#else
+#  define DBG
+#endif
 
 class ExprBase {
   protected:
@@ -19,6 +25,7 @@ class ExprBase {
 
   public:
     ExprBase(Token t) : m_token(t) {}
+    virtual ~ExprBase() {};
 
     // Expose token
     TokenType type() const { return m_token.m_type; }
@@ -38,6 +45,7 @@ class ExprLiteral : public ExprBase {
     {
       assert( m_token.m_type == FLOAT );
     }
+    virtual ~ExprLiteral() {};
     float value() const { return m_token.m_data.value; }
 
     virtual ASTdata accept( ASTVisitor *visitor ) const;
@@ -50,6 +58,7 @@ class ExprConstant : public ExprBase {
     {
       assert( m_token.m_type == CONSTANT );
     }
+    virtual ~ExprConstant() {};
     float value() const { return *(m_token.m_data.pValue); }
 
     virtual ASTdata accept( ASTVisitor *visitor ) const;
@@ -65,6 +74,7 @@ class ExprUnaryOp : public ExprBase {
     {
       assert( m_token.m_type == NEGATIVE );
     }
+    virtual ~ExprUnaryOp() { delete m_expr; };
 
     void setArg(ExprBase* expr) {
       assert( expr != NULL );
@@ -84,6 +94,7 @@ class ExprBinOp : public ExprBase {
     {
       assert( m_token.m_type >= PLUS && m_token.m_type <= POWER );
     }
+    virtual ~ExprBinOp() { delete m_exprLeft; delete m_exprRight; };
 
     void setArgs(ExprBase* left, ExprBase* right)
     {
@@ -110,6 +121,10 @@ class ExprFunction : public ExprBase {
 
       for (int i=0; i<MAX_FUNCTION_ARGUMENTS; i++)
         m_argv[i] = NULL;
+    }
+    virtual ~ExprFunction() {
+      for (int i=0; i<m_numArgs; i++)
+        delete m_argv[i];
     }
 
     Function::ID id() const { return m_token.m_data.id; }
@@ -149,5 +164,6 @@ class ExprError : public std::exception
     std::string m_message;
 };
 
+#undef DBG
 
 #endif //EXPR_H
