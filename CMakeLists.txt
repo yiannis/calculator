@@ -21,10 +21,12 @@ qt4_wrap_cpp( TEST_MOC_SOURCES ${TEST_H} )
 
 ##################TARGETS##################
 #calculator#
-ADD_EXECUTABLE( calculator "calculator.cc" ${PARSER_SOURCES} )
+ADD_LIBRARY( calc SHARED ${PARSER_SOURCES} )
+ADD_EXECUTABLE( calculator "calculator.cc" )
+TARGET_LINK_LIBRARIES( calculator "calc" )
 
 #test#
 IF(QT4_FOUND)
-  ADD_EXECUTABLE( test "Test.cc" ${PARSER_SOURCES} ${TEST_MOC_SOURCES} )
-  TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES} )
+  ADD_EXECUTABLE( test "Test.cc" ${TEST_MOC_SOURCES} )
+  TARGET_LINK_LIBRARIES( test "calc" ${QT_LIBRARIES} )
 ENDIF(QT4_FOUND)
