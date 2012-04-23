@@ -2,13 +2,32 @@
 
 #include <QString>
 
+#include "Token.h"
+#include "Function.h"
 #include "Interpreter.h"
 #include "Test.h"
 
 using namespace std;
 
-void Test::initTestCase()
+void Test::lexerTest()
 {
+  istringstream source("\tsin ( pi/2.0 + x)\n * e");
+
+  float x = 10.0F;
+  Lexer lexer(&source);
+  lexer.pushConstant( "x", &x );
+
+  QCOMPARE( lexer.nextToken().m_data.id, Function::SIN );
+  QCOMPARE( lexer.nextToken().m_type, LPAREN );
+  QCOMPARE( lexer.nextToken().m_type, CONSTANT );
+  QCOMPARE( lexer.nextToken().m_type, DIV );
+  QCOMPARE( lexer.nextToken().m_data.value, 2.0F );
+  QCOMPARE( lexer.nextToken().m_type, PLUS );
+  QCOMPARE( lexer.nextToken().m_data.pValue, &x );
+  QCOMPARE( lexer.nextToken().m_type, RPAREN );
+  QCOMPARE( lexer.nextToken().m_type, MULT );
+  QCOMPARE( lexer.nextToken().m_type, CONSTANT );
+  QCOMPARE( lexer.nextToken().m_type, END );
 }
 
 void Test::parserTest_data()
@@ -32,13 +51,33 @@ void Test::parserTest()
   istringstream input(function.toUtf8().constData());
 
   Interpreter engine(&input);
-  engine.set( "x",  5.0F );
-  engine.set( "y",  3.0F );
-  engine.set( "t", -1.0F );
+  engine["x"] =  5.0F;
+  engine["y"] =  3.0F;
+  engine["t"] = -1.0F;
 
   QVERIFY( engine.parse() );
 
   QCOMPARE( engine.result(), result );
+}
+
+void Test::updateValuesTest()
+{
+  istringstream input("x*y^z");
+
+  Interpreter engine(&input);
+  engine["x"] =  4.0F;
+  engine["y"] =  2.0F;
+  engine["z"] =  2.0F;
+
+  QVERIFY( engine.parse() );
+
+  QCOMPARE( engine.result(), 16.0F );
+
+  engine["x"] =  3.0F;
+  engine["y"] =  3.0F;
+  engine["z"] =  3.0F;
+
+  QCOMPARE( engine.result(), 81.0F );
 }
 
 QTEST_MAIN(Test)

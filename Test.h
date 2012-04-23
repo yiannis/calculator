@@ -11,10 +11,12 @@ class Test: public QObject
     private:
 
     private slots:
-      void initTestCase();
+      void lexerTest();
 
       void parserTest();
       void parserTest_data();
+
+      void updateValuesTest();
 };
 
 #endif //TEST_H
