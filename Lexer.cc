@@ -87,8 +87,11 @@ Token Lexer::scanString()
     return Token( &S_LN10, m_charPos );
   else if (Function::isNameValid(name)) // Check for a function name
     return Token( Function::nameToID(name), m_charPos );
-  else // We don't support anything else right now...
-    throw 100;
+  else { // We don't support anything else right now...
+    cerr << "Warning: Unknown string '" << name
+         << "'.\nReplacing it with a constant of value 0.0F" << endl;
+    return Token( &S_0, m_charPos );
+  }
 }
 
 Token Lexer::scanFloat()
@@ -135,3 +138,4 @@ float Lexer::S_PI    = M_PI;
 float Lexer::S_E     = M_E;
 float Lexer::S_LN2   = M_LN2;
 float Lexer::S_LN10  = M_LN10;
+float Lexer::S_0     = 0.0F;

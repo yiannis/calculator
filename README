@@ -16,12 +16,14 @@ $ ./test
 Usage:
 $ ./calculator "math-expression" [<var1> <value1>] [<var2> <value2>] ...
 E.g:
-$ ./calculator "x^2+y+sin(pi*t)" x 1 y 2 t 7
+$ ./calculator "x^2+y*sin(pi*t)" x 0.5 y 2 t 7
+t = 7, x = 0.5, y = 2,
+x^2+y*sin(pi*t) = 0.249997
 
 
 --
 Copyright 2012 Yiannis Belias
-Use under the GPLv3 or later, see COPYING. 
+Use under the GPLv3 or later, see COPYING.
 --
 Yiannis Belias  <yiannisbe@gmail.com>              `
 Homepage [http://users.hol.gr/~jonnyb/video] '              .

@@ -56,6 +56,7 @@ class Lexer {
     static float S_E;
     static float S_LN2;
     static float S_LN10;
+    static float S_0;
 };
 
 #endif //LEXER_H
