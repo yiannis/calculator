@@ -27,6 +27,7 @@ class Function {
     static int *numArguments;
 
     static int *fillNumArguments();
+    static int numFunctions();
     static ID nameToID(std::string name);
     static std::string IDtoName(ID id);
     static bool isNameValid( const std::string& name );

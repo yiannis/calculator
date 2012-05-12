@@ -1,6 +1,10 @@
+#include <cstdio>
+#include <string>
+#include <map>
+#include <vector>
 #include <cmath>
 
-#include "Visitor.h"
+#include "ASTVisitorExecutor.h"
 #include "Expr.h"
 
 #ifdef DEBUG
@@ -10,13 +14,13 @@
 # define DBG
 #endif
 
+/// ASTVisitorExecutor ///
 ASTdata ASTVisitorExecutor::visit( const ExprLiteral *expr ) const
 {
   ASTdata data;
   data.f = expr->value();
   return data;
 }
-
 
 ASTdata ASTVisitorExecutor::visit( const ExprConstant *expr ) const
 {

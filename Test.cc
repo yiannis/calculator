@@ -5,6 +5,7 @@
 #include "Token.h"
 #include "Function.h"
 #include "Interpreter.h"
+#include "Compiler.h"
 #include "Test.h"
 
 using namespace std;
@@ -74,6 +75,27 @@ void Test::updateValuesTest()
   engine["z"] =  3.0F;
 
   QCOMPARE( engine.result(), 81.0F );
+}
+
+void Test::CompilerTest_data()
+{
+  parserTest_data();
+}
+
+void Test::CompilerTest()
+{
+  QFETCH(QString, function);
+  QFETCH(float, result);
+
+  istringstream input(function.toUtf8().constData());
+
+  Compiler llvmMath(&input);
+  llvmMath["x"] =  5.0F;
+  llvmMath["y"] =  3.0F;
+  llvmMath["t"] = -1.0F;
+  llvmMath.emmitIR();
+
+  QCOMPARE( llvmMath.result(), result );
 }
 
 QTEST_MAIN(Test)

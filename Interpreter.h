@@ -5,7 +5,7 @@
 #include <cassert>
 
 #include "ASTBuilder.h"
-#include "Visitor.h"
+#include "ASTVisitorExecutor.h"
 #include "Parser.h"
 #include "Lexer.h"
 

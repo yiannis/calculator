@@ -5,6 +5,11 @@
 
 using namespace std;
 
+int Function::numFunctions()
+{
+  return NUM_FUNCTIONS-1;
+}
+
 Function::ID Function::nameToID(string name)
 {
   if (name == "sin")

@@ -5,12 +5,14 @@ PROJECT( Calculator )
 SET( CMAKE_BUILD_TYPE "RelWithDebInfo" )
 
 SET( PARSER_SOURCES
+  "ASTVisitorExecutor.cc"
+  "ASTVisitorLLVMIR.cc"
+  "Compiler.cc"
   "Expr.cc"
   "Function.cc"
-  "Token.cc"
   "Lexer.cc"
   "Parser.cc"
-  "Visitor.cc")
+  "Token.cc")
 
 SET( TEST_H "Test.h" )
 
@@ -19,14 +21,30 @@ FIND_PACKAGE(Qt4 COMPONENTS QtCore QtTest)
 INCLUDE(${QT_USE_FILE})
 qt4_wrap_cpp( TEST_MOC_SOURCES ${TEST_H} )
 
+# For llvm
+FIND_PROGRAM(LLVM_CONFIG_EXECUTABLE
+    NAMES llvm-config llvm-config-3.0
+)
+
+EXEC_PROGRAM(${LLVM_CONFIG_EXECUTABLE} ARGS --cxxflags  OUTPUT_VARIABLE LLVM_CXX_FLAGS )
+EXEC_PROGRAM(${LLVM_CONFIG_EXECUTABLE} ARGS --ldflags   OUTPUT_VARIABLE LLVM_LDFLAGS )
+EXEC_PROGRAM(${LLVM_CONFIG_EXECUTABLE} ARGS --libs      OUTPUT_VARIABLE LLVM_LIBS )
+SET( LLVM_LIBRARIES ${LLVM_LIBS} ${LLVM_LDFLAGS} )
+SET( LLVM_CXX_FLAGS "${LLVM_CXX_FLAGS} -fexceptions" )
+
+SET_SOURCE_FILES_PROPERTIES( "ASTVisitorLLVMIR.cc" "Compiler.cc"
+                             PROPERTIES COMPILE_FLAGS ${LLVM_CXX_FLAGS} )
+
 ##################TARGETS##################
 #calculator#
 ADD_LIBRARY( calc SHARED ${PARSER_SOURCES} )
 ADD_EXECUTABLE( calculator "calculator.cc" )
-TARGET_LINK_LIBRARIES( calculator "calc" )
+SET_TARGET_PROPERTIES( calculator PROPERTIES COMPILE_FLAGS ${LLVM_CXX_FLAGS} )
+TARGET_LINK_LIBRARIES( calculator "calc" ${LLVM_LIBRARIES} )
 
 #test#
 IF(QT4_FOUND)
   ADD_EXECUTABLE( test "Test.cc" ${TEST_MOC_SOURCES} )
-  TARGET_LINK_LIBRARIES( test "calc" ${QT_LIBRARIES} )
+  SET_TARGET_PROPERTIES( test PROPERTIES COMPILE_FLAGS ${LLVM_CXX_FLAGS} )
+  TARGET_LINK_LIBRARIES( test "calc" ${QT_LIBRARIES} ${LLVM_LIBRARIES} )
 ENDIF(QT4_FOUND)

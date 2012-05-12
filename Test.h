@@ -17,6 +17,9 @@ class Test: public QObject
       void parserTest_data();
 
       void updateValuesTest();
+
+      void CompilerTest();
+      void CompilerTest_data();
 };
 
 #endif //TEST_H
