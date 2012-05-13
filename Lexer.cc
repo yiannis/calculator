@@ -90,7 +90,7 @@ Token Lexer::scanString()
   else { // We don't support anything else right now...
     cerr << "Warning: Unknown string '" << name
          << "'.\nReplacing it with a constant of value 0.0F" << endl;
-    return Token( &S_0, m_charPos, name );
+    return Token( 0.0F, m_charPos );
   }
 }
 
