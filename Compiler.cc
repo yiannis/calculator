@@ -40,14 +40,19 @@ Compiler::~Compiler()
 
 void Compiler::emmitIR()
 {
+  initConstantIDs();
+  m_llvmIR->setConstantIDs( &m_constantIDs );
+
   LLVMContext &Context = getGlobalContext();
 
-  // Create a 'double main()' prototype
-  vector<Type*> void_arg;
-  FunctionType *mainType = FunctionType::get( Type::getDoubleTy(Context), void_arg, false );
+  // Create a 'double main(double*)' prototype
+  vector<Type*> main_args;
+  main_args.push_back( Type::getDoublePtrTy(Context) );
+  FunctionType *mainType = FunctionType::get( Type::getDoubleTy(Context), main_args, false );
 
-  // Create the 'double main()' function definition inside m_mathModule
+  // Create the 'double main(double* argv)' function definition inside m_mathModule
   m_mainFunc = llvm::Function::Create( mainType, llvm::Function::ExternalLinkage, "main", m_mathModule );
+  m_mainFunc->arg_begin()->setName("argv");
 
   // Create a new basic block to start insertion into 'main()'
   BasicBlock *mainBlock = BasicBlock::Create( Context, "entry_point", m_mainFunc );
@@ -73,7 +78,7 @@ void Compiler::initMathFunctions()
   LLVMContext &Context = getGlobalContext();
 
   for (int id=0; id<Function::numFunctions(); id++) {
-    //// Create a 'double func(double)' prototype
+    // Create a 'double func(double)' prototype
     vector<Type*> double_args;
     if (Function::numArguments[id] >= 1)
       double_args.push_back( Type::getDoubleTy(Context) );
@@ -81,7 +86,7 @@ void Compiler::initMathFunctions()
       double_args.push_back( Type::getDoubleTy(Context) );
     FunctionType *ftype = FunctionType::get( Type::getDoubleTy(Context), double_args, false );
 
-    //// Create the 'double func(double)' function definition inside the m_mathModule
+    // Create the 'double func(double)' function definition inside the m_mathModule
     llvm::Function *func = llvm::Function::Create(
         ftype,
         llvm::Function::ExternalLinkage,
@@ -89,6 +94,14 @@ void Compiler::initMathFunctions()
         m_mathModule
     );
   }
+}
+
+void Compiler::initConstantIDs()
+{
+    int idx = 0;
+    const std::map<std::string,float>& constants = getConstantsTable();
+    for (IC i=constants.begin(); i!=constants.end(); i++, idx++)
+      m_constantIDs[i->first] = idx;
 }
 
 float Compiler::result()
@@ -101,7 +114,13 @@ float Compiler::result()
 
   // Cast it to the right type (takes no arguments, returns a double) so we
   // can call it as a native function.
-  double (*MainFPtr)() = (double (*)())(intptr_t)pMain;
+  double (*MainFPtr)(double*) = (double (*)(double*))(intptr_t)pMain;
 
-  return MainFPtr();
+  const std::map<std::string,float>& constants = getConstantsTable();
+  vector<double> constantsVector( constants.size() );
+  for (IC i=constants.begin(); i!=constants.end(); i++) {
+    constantsVector[m_constantIDs[i->first]] = i->second;
+  }
+
+  return MainFPtr(&constantsVector[0]);
 }

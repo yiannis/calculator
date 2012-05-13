@@ -21,9 +21,16 @@ class ASTVisitorLLVMIR: public ASTVisitor {
       m_mathModule( mathModule ), m_mathBuilder( mathBuilder )
     {}
 
+    ASTVisitorLLVMIR *setConstantIDs( const std::map<std::string,int> *constantIDs )
+    {
+      m_constantIDs = constantIDs;
+      return this;
+    }
+
   private:
     llvm::Module *m_mathModule;
     llvm::IRBuilder<> *m_mathBuilder;
+    const std::map<std::string,int> *m_constantIDs;
 
     llvm::Value *callFunc( const std::string& name, llvm::Value *v0 = NULL, llvm::Value *v1 = NULL ) const;
 };

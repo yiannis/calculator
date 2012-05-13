@@ -56,13 +56,15 @@ class ASTBuilder {
     /// Print for debugging
     void printConstantsTable() const
     {
-      for (I i=m_constants.begin(); i!=m_constants.end(); i++)
+      for (IC i=m_constants.begin(); i!=m_constants.end(); i++)
         std::cout << i->first << ": " << i->second << "@" << &i->second << std::endl;
       m_lexer->print();
     }
 
+  protected:
+    typedef std::map<std::string,float>::const_iterator IC;
+
   private:
-    typedef std::map<std::string,float>::const_iterator I;
 
     Lexer *m_lexer;
     Parser *m_parser;

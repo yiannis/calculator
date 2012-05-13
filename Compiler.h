@@ -23,8 +23,10 @@ class Compiler : public ASTBuilder {
     llvm::IRBuilder<> *m_mathBuilder;
     llvm::Function *m_mainFunc;
     ASTVisitorLLVMIR *m_llvmIR;
+    std::map<std::string,int> m_constantIDs;
 
     void initMathFunctions();
+    void initConstantIDs();
 };
 
 #endif // COMPILER_H 

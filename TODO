@@ -1,7 +1,6 @@
 TODO
 
 llvm:
- 0. input vars in main()
  1. IR optimization
  2. Compiler::result() should not JIT the code
  3. Test benchmarks

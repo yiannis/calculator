@@ -38,7 +38,18 @@ ASTdata ASTVisitorLLVMIR::visit( const ExprLiteral *expr ) const
 ASTdata ASTVisitorLLVMIR::visit( const ExprConstant *expr ) const
 {
   ASTdata data;
-  data.v = ConstantFP::get(getGlobalContext(), APFloat(static_cast<double>(expr->value())));
+  int constantID = m_constantIDs->find(expr->name())->second;
+
+  // Get the 'double main(double* argv)' function
+  llvm::Function *MainF = m_mathModule->getFunction( "main" );
+  // Get the first argument of main()
+  Value *main_argv = MainF->arg_begin();
+  // Get the pointer to the argv element with id 'constantID': p_argvID = argv+constantID
+  Value *p_argvID = m_mathBuilder->CreateConstGEP1_32(main_argv, constantID, "pID");
+  // Dereference the above value
+  Value *argvID = m_mathBuilder->CreateLoad( p_argvID, "argvID" );
+
+  data.v = argvID;
   return data;
 }
 
