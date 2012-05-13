@@ -1,4 +1,12 @@
 TODO
+
+llvm:
+ 0. input vars in main()
+ 1. IR optimization
+ 2. Test benchmarks
+ 3. Convert llvm doubles to floats
+
+general:
 0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
 1. Really use Exceptions, not just throw 'int'
 2. Create destructors for ExprBase, etc and Parser!!!
