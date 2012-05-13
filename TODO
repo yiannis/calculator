@@ -1,10 +1,10 @@
 TODO
 
 llvm:
- 1. IR optimization
- 2. Compiler::result() should not JIT the code
- 3. Test benchmarks
- 4. Convert llvm doubles to floats
+ 0. Compiler::result() should not JIT the code
+ 1. Test benchmarks
+ 2. IR optimization
+ 3. Convert llvm doubles to floats
 
 general:
 0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
