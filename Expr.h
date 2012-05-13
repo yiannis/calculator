@@ -31,6 +31,7 @@ class ExprBase {
     TokenType type() const { return m_token.m_type; }
     int position() const { return m_token.m_pos; }
     std::string toString() const { return m_token.toString(); }
+    const std::string& name() const { return m_token.name(); }
 
     virtual ASTdata accept( ASTVisitor *visitor ) const = 0;
 

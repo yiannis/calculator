@@ -74,23 +74,23 @@ Token Lexer::scanString()
 
   // Check if 'name' is a user constant
   if (m_constants.find( name ) != m_constants.end())
-    return Token( m_constants[name], m_charPos );
+    return Token( m_constants[name], m_charPos, name );
 
   // Check if 'name' is a builtin constant
   if (name == "pi")
-    return Token( &S_PI, m_charPos );
+    return Token( &S_PI, m_charPos, "pi" );
   else if (name == "e")
-    return Token( &S_E, m_charPos );
+    return Token( &S_E, m_charPos, "e" );
   else if (name == "ln2")
-    return Token( &S_LN2, m_charPos );
+    return Token( &S_LN2, m_charPos, "ln2" );
   else if (name == "ln10")
-    return Token( &S_LN10, m_charPos );
+    return Token( &S_LN10, m_charPos, "ln10" );
   else if (Function::isNameValid(name)) // Check for a function name
     return Token( Function::nameToID(name), m_charPos );
   else { // We don't support anything else right now...
     cerr << "Warning: Unknown string '" << name
          << "'.\nReplacing it with a constant of value 0.0F" << endl;
-    return Token( &S_0, m_charPos );
+    return Token( &S_0, m_charPos, name );
   }
 }
 

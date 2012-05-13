@@ -54,8 +54,8 @@ struct Token {
   {
     m_data.value = value;
   }
-  Token( const float *pvalue, int pos ) :
-    m_type(CONSTANT), m_pos(pos)
+  Token( const float *pvalue, int pos, const std::string& name ) :
+    m_type(CONSTANT), m_pos(pos), m_name(name)
   {
     m_data.pValue = pvalue;
   }
@@ -84,11 +84,13 @@ struct Token {
 
     return str;
   }
+  const std::string& name() const { return m_name; }
 
   static const std::string tokenToString(TokenType t);
 
   TokenType m_type;
   int m_pos;
+  std::string m_name;
   union {
     Function::ID id;
     float value;
