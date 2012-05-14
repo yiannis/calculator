@@ -1,8 +1,7 @@
 TODO
 
 llvm:
- 0. IR optimization
- 1. Convert llvm doubles to floats
+ 0. Convert llvm doubles to floats
 
 general:
 0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions

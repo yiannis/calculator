@@ -1,8 +1,12 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Analysis/Verifier.h>
+#include <llvm/Analysis/Passes.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/Target/TargetData.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/PassManager.h>
 
 #include "Compiler.h"
 
@@ -19,6 +23,12 @@ using llvm::Value;
 using llvm::verifyFunction;
 using llvm::ExecutionEngine;
 using llvm::EngineBuilder;
+using llvm::TargetData;
+using llvm::createBasicAliasAnalysisPass;
+using llvm::createInstructionCombiningPass;
+using llvm::createReassociatePass;
+using llvm::createGVNPass;
+using llvm::createCFGSimplificationPass;
 
 Compiler::Compiler(istream *input) :
   ASTBuilder(input)
@@ -78,6 +88,35 @@ void Compiler::emmitIR()
   verifyFunction( *m_mainFunc );
 }
 
+void Compiler::optimizeIR()
+{
+  llvm::FunctionPassManager fpm( m_mathModule );
+
+  // Set up the optimizer pipeline.  Start with registering info about how the
+  // target lays out data structures.
+  fpm.add(new TargetData(*m_execEngine->getTargetData()));
+
+  // Provide basic AliasAnalysis support for GVN.
+  fpm.add(createBasicAliasAnalysisPass());
+
+  // Do simple "peephole" optimizations and bit-twiddling optzns.
+  fpm.add(createInstructionCombiningPass());
+
+  // Reassociate expressions.
+  fpm.add(createReassociatePass());
+
+  // Eliminate Common SubExpressions.
+  fpm.add(createGVNPass());
+
+  // Simplify the control flow graph (deleting unreachable blocks, etc).
+  fpm.add(createCFGSimplificationPass());
+
+  fpm.doInitialization();
+
+  // Optimize the main() function.
+  fpm.run(*m_mainFunc);
+}
+
 void Compiler::printIR()
 {
   m_mathModule->dump();
@@ -128,10 +167,13 @@ void Compiler::compile()
   emmitIR();
 
   // Create the JIT.  This takes ownership of the module.
-  ExecutionEngine *execEngine = EngineBuilder(m_mathModule).create();
+  m_execEngine = EngineBuilder(m_mathModule).create();
+
+  // Optimize the Module assembly code
+  optimizeIR();
 
   // JIT the function, returning a function pointer.
-  void *pMain = execEngine->getPointerToFunction(m_mainFunc);
+  void *pMain = m_execEngine->getPointerToFunction(m_mainFunc);
 
   // Cast it to the right type (takes no arguments, returns a double) so we
   // can call it as a native function.
