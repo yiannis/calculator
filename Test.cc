@@ -110,4 +110,39 @@ void Test::CompilerTest()
   QCOMPARE( llvmMath.result(), result );
 }
 
+void Test::CompilerVsInterpreterTest_data()
+{
+  QTest::addColumn<bool>("useCompiler");
+  QTest::newRow("Compiler") << true;
+  QTest::newRow("Interpreter") << false;
+}
+
+void Test::CompilerVsInterpreterTest()
+{
+  QFETCH(bool, useCompiler);
+
+  string function("(x-y)^pow(y-1,3/y)*(x*sqrt(25))");
+  istringstream input(function);
+  float result;
+
+  if (useCompiler) {
+    Compiler llvmc(&input);
+    llvmc.set( "x", 5.0F );
+    llvmc.set( "y", 3.0F );
+    llvmc.set( "t",-1.0F );
+    llvmc.compile();
+
+    QBENCHMARK { result = llvmc.result(); }
+  } else {
+    Interpreter engine(&input);
+    engine.set( "x", 5.0F );
+    engine.set( "y", 3.0F );
+    engine.set( "t",-1.0F );
+
+    QBENCHMARK { result = engine.result(); }
+  }
+
+  QCOMPARE( result, 100.0F );
+}
+
 QTEST_MAIN(Test)

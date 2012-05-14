@@ -20,6 +20,9 @@ class Test: public QObject
 
       void CompilerTest();
       void CompilerTest_data();
+
+      void CompilerVsInterpreterTest();
+      void CompilerVsInterpreterTest_data();
 };
 
 #endif //TEST_H
