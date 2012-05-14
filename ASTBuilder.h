@@ -31,16 +31,7 @@ class ASTBuilder {
     /// Set a user defined constant (overloaded method)
     ASTBuilder& set( const char *name, float value )
     {
-      this->set( std::string(name), value );
-      return *this;
-    }
-    /// Get/Set the value of a constant (overloaded method)
-    float& operator[]( const std::string& name )
-    {
-      if (m_constants.find(name) == m_constants.end())
-        this->set( name, 0.0F );
-
-      return m_constants[name];
+      return this->set( std::string(name), value );
     }
     /// Run the visitor on the AST
     ASTdata visitorResult( ASTVisitor *visitor )

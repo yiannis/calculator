@@ -52,29 +52,41 @@ void Test::parserTest()
   istringstream input(function.toUtf8().constData());
 
   Interpreter engine(&input);
-  engine["x"] =  5.0F;
-  engine["y"] =  3.0F;
-  engine["t"] = -1.0F;
+  engine.set( "x", 5.0F );
+  engine.set( "y", 3.0F );
+  engine.set( "t",-1.0F );
 
   QCOMPARE( engine.result(), result );
 }
 
 void Test::updateValuesTest()
 {
-  istringstream input("x*y^z");
+  string func("x*y^z");
+  istringstream i_input(func), c_input(func);
 
-  Interpreter engine(&input);
-  engine["x"] =  4.0F;
-  engine["y"] =  2.0F;
-  engine["z"] =  2.0F;
+  Interpreter engine(&i_input);
+  engine.set( "x", 4.0F );
+  engine.set( "y", 2.0F );
+  engine.set( "z", 2.0F );
+
+  Compiler llvmc(&c_input);
+  llvmc.set( "x", 4.0F );
+  llvmc.set( "y", 2.0F );
+  llvmc.set( "z", 2.0F );
+  llvmc.compile();
 
   QCOMPARE( engine.result(), 16.0F );
+  QCOMPARE( llvmc.result(),  16.0F );
 
-  engine["x"] =  3.0F;
-  engine["y"] =  3.0F;
-  engine["z"] =  3.0F;
+  engine.set( "x", 3.0F );
+  engine.set( "y", 3.0F );
+  engine.set( "z", 3.0F );
+  llvmc.set( "x", 3.0F );
+  llvmc.set( "y", 3.0F );
+  llvmc.set( "z", 3.0F );
 
   QCOMPARE( engine.result(), 81.0F );
+  QCOMPARE( llvmc.result(), 81.0F );
 }
 
 void Test::CompilerTest_data()
@@ -90,10 +102,10 @@ void Test::CompilerTest()
   istringstream input(function.toUtf8().constData());
 
   Compiler llvmMath(&input);
-  llvmMath["x"] =  5.0F;
-  llvmMath["y"] =  3.0F;
-  llvmMath["t"] = -1.0F;
-  llvmMath.emmitIR();
+  llvmMath.set( "x", 5.0F );
+  llvmMath.set( "y", 3.0F );
+  llvmMath.set( "t",-1.0F );
+  llvmMath.compile();
 
   QCOMPARE( llvmMath.result(), result );
 }
