@@ -16,7 +16,7 @@ class Compiler : public ASTBuilder {
     Compiler(std::istream *input);
     ~Compiler();
 
-    virtual void set( const std::string& name, float value );
+    virtual float set( const std::string& name, float value );
     void compile();
     float result();
     void printIR();

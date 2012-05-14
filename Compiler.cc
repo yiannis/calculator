@@ -49,12 +49,14 @@ Compiler::~Compiler()
   delete m_llvmIR;
 }
 
-void Compiler::set( const std::string& name, float value )
+float Compiler::set( const std::string& name, float value )
 {
   ASTBuilder::set( name, value );
 
   if (m_constantIDs.size() > 0) // compiler has run
     m_constantsVector[m_constantIDs[name]] = value;
+
+  return value;
 }
 
 void Compiler::emmitIR()
