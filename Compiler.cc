@@ -147,10 +147,10 @@ void Compiler::initMathFunctions()
 
 void Compiler::initConstantIDs()
 {
-    int idx = 0;
-    const std::map<std::string,float>& constants = getConstantsTable();
-    for (IC i=constants.begin(); i!=constants.end(); i++, idx++)
-      m_constantIDs[i->first] = idx;
+  int idx = 0;
+  const std::map<std::string,float>& constants = getConstantsTable();
+  for (IC i=constants.begin(); i!=constants.end(); i++, idx++)
+    m_constantIDs[i->first] = idx;
 }
 
 void Compiler::initConstantsVector()
