@@ -21,17 +21,15 @@ class ASTBuilder {
     }
 
     /// Set a user defined constant
-    ASTBuilder& set( const std::string& name, float value )
+    virtual void set( const std::string& name, float value )
     {
       m_constants[name] = value;
       m_lexer->pushConstant( name, &m_constants[name] );
-
-      return *this;
     }
     /// Set a user defined constant (overloaded method)
-    ASTBuilder& set( const char *name, float value )
+    void set( const char *name, float value )
     {
-      return this->set( std::string(name), value );
+      this->set( std::string(name), value );
     }
     /// Run the visitor on the AST
     ASTdata visitorResult( ASTVisitor *visitor )

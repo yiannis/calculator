@@ -1,7 +1,6 @@
 TODO
 
 llvm:
- 0. Compiler::result() should not JIT the code
  1. Test benchmarks
  2. IR optimization
  3. Convert llvm doubles to floats

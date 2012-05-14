@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     engine.set( argv[arg], atof(argv[arg+1]) );
     llvmc.set( argv[arg], atof(argv[arg+1]) );
   }
-  llvmc.emmitIR();
+  llvmc.compile();
 
   for (iter i=engine.getConstantsTable().begin(); i!=engine.getConstantsTable().end(); i++)
     cout << i->first << " = " << i->second << ", ";

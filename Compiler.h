@@ -14,8 +14,9 @@ class Compiler : public ASTBuilder {
     Compiler(std::istream *input);
     ~Compiler();
 
+    virtual void set( const std::string& name, float value );
+    void compile();
     float result();
-    void emmitIR();
     void printIR();
 
   private:
@@ -24,9 +25,13 @@ class Compiler : public ASTBuilder {
     llvm::Function *m_mainFunc;
     ASTVisitorLLVMIR *m_llvmIR;
     std::map<std::string,int> m_constantIDs;
+    std::vector<double> m_constantsVector;
+    double (*MainFPtr)(double*);
 
+    void emmitIR();
     void initMathFunctions();
     void initConstantIDs();
+    void initConstantsVector();
 };
 
 #endif // COMPILER_H 

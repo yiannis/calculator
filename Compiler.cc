@@ -36,11 +36,21 @@ Compiler::~Compiler()
 {
   delete m_mathModule;
   delete m_mathBuilder;
+  delete m_llvmIR;
+}
+
+void Compiler::set( const std::string& name, float value )
+{
+  ASTBuilder::set( name, value );
+
+  if (m_constantIDs.size() > 0) // compiler has run
+    m_constantsVector[m_constantIDs[name]] = value;
 }
 
 void Compiler::emmitIR()
 {
   initConstantIDs();
+
   m_llvmIR->setConstantIDs( &m_constantIDs );
 
   LLVMContext &Context = getGlobalContext();
@@ -104,8 +114,19 @@ void Compiler::initConstantIDs()
       m_constantIDs[i->first] = idx;
 }
 
-float Compiler::result()
+void Compiler::initConstantsVector()
 {
+  const std::map<std::string,float>& constants = getConstantsTable();
+  m_constantsVector.resize( constants.size() );
+  for (IC i=constants.begin(); i!=constants.end(); i++)
+    m_constantsVector[m_constantIDs[i->first]] = i->second;
+}
+
+void Compiler::compile()
+{
+  // Create the Module assembly code
+  emmitIR();
+
   // Create the JIT.  This takes ownership of the module.
   ExecutionEngine *execEngine = EngineBuilder(m_mathModule).create();
 
@@ -114,13 +135,13 @@ float Compiler::result()
 
   // Cast it to the right type (takes no arguments, returns a double) so we
   // can call it as a native function.
-  double (*MainFPtr)(double*) = (double (*)(double*))(intptr_t)pMain;
+  MainFPtr = (double (*)(double*))(intptr_t)pMain;
 
-  const std::map<std::string,float>& constants = getConstantsTable();
-  vector<double> constantsVector( constants.size() );
-  for (IC i=constants.begin(); i!=constants.end(); i++) {
-    constantsVector[m_constantIDs[i->first]] = i->second;
-  }
+  // Create the input array to main()
+  initConstantsVector();
+}
 
-  return MainFPtr(&constantsVector[0]);
+float Compiler::result()
+{
+  return MainFPtr(&m_constantsVector[0]);
 }
