@@ -68,14 +68,15 @@ struct Token {
 
     switch (m_type) {
       case FUNCTION:
-        str = Function::IDtoName( m_data.id );
+        out << Function::IDtoName( m_data.id ) << "()";
+        str = out.str();
         break;
       case FLOAT:
         out << "(" << m_data.value << ")";
         str = out.str();
         break;
       case CONSTANT:
-        out << "(" << *(m_data.pValue) << ")";
+        out << "(" << m_name << ":" << *(m_data.pValue) << ")";
         str = out.str();
         break;
       default:
