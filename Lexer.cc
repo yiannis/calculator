@@ -134,8 +134,8 @@ Token Lexer::scanFloat()
 }
 
 
-float Lexer::S_PI    = M_PI;
-float Lexer::S_E     = M_E;
-float Lexer::S_LN2   = M_LN2;
-float Lexer::S_LN10  = M_LN10;
-float Lexer::S_0     = 0.0F;
+const float Lexer::S_PI    = M_PI;
+const float Lexer::S_E     = M_E;
+const float Lexer::S_LN2   = M_LN2;
+const float Lexer::S_LN10  = M_LN10;
+const float Lexer::S_0     = 0.0F;

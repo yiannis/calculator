@@ -31,6 +31,12 @@ class Lexer {
         std::cout << i->first << ": " << *i->second << "@" << i->second << std::endl;
     }
 
+    static const float S_PI;
+    static const float S_E;
+    static const float S_LN2;
+    static const float S_LN10;
+    static const float S_0;
+
   private:
     typedef std::map<std::string,const float*>::const_iterator I;
 
@@ -51,12 +57,6 @@ class Lexer {
     Token scan();
     Token scanString();
     Token scanFloat();
-
-    static float S_PI;
-    static float S_E;
-    static float S_LN2;
-    static float S_LN10;
-    static float S_0;
 };
 
 #endif //LEXER_H
