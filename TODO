@@ -4,9 +4,10 @@ llvm:
  0. Convert llvm doubles to floats
 
 general:
-0. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
-1. Really use Exceptions, not just throw 'int'
-2. Create destructors for ExprBase, etc and Parser!!!
+0. Add Variables or Input Constants to differentiate from built-in constants
+1. Add *_BEGIN/*_END in TokenType and create static isOpType() functions
+2. Really use Exceptions, not just throw 'int'
+3. Create destructors for ExprBase, etc and Parser!!!
 
 - Add pi/e/... constants
 - Replace 'char m_op' with 'TokenType m_op' [OK]
