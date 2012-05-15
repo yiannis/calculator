@@ -1,10 +1,16 @@
 This is just an experiment, to write a simple parser for arithmetic expressions.
 
-A Lexer class is used to scan the input and feed the Parser class with Tokens.
+ A Lexer class is used to scan the input and feed the Parser class with Tokens.
 The Parser then creates an Abstract Syntax Tree, using the ExprBase and decendents class.
 A Visitor class is used to traverse the AST and execute the code.
 The Lexer supports adding named constants. There are also some builtin constants supported,
-plus a few functions.
+plus a few standard C library functions.
+
+The above classes are used by the Interpreter and Compiler class.
+Interpreter creates the AST and then uses the ASTVisitorExecutor class to compute the result.
+On the other hand, a new llvm visitor class is supported, used in the Compiler class.
+ASTVisitorLLVMIR creates LLVM IR assembly code, which is then compiled to native code
+and executes much faster than the Interpreter class. (About 20 times faster.)
 
 Compile:
 $ cmake .
@@ -13,13 +19,18 @@ $ make
 If you have qt-devel libraries, tests will also be created:
 $ ./test
 
-Usage:
-$ ./calculator "math-expression" [<var1> <value1>] [<var2> <value2>] ...
+Usage: ./calculator [-d] <math-expression> [<var1> <value1>] [<var2> <value2>] ...
+[-d]   Dump the llvm IR assembly
+
 E.g:
 $ ./calculator "x^2+y*sin(pi*t)" x 0.5 y 2 t 7
 t = 7, x = 0.5, y = 2,
-x^2+y*sin(pi*t) = 0.249997
+x^2+y*sin(pi*t):
+(native)= 0.249997
+(llvm)= 0.249999
 
+For examples of how to use the classes in your own code, you can look at the calculator.cc
+or Test.cc files. You only need to use either the Compiler or Interpreter class.
 
 --
 Copyright 2012 Yiannis Belias
