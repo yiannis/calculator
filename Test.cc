@@ -188,37 +188,46 @@ void Test::CompilerTest()
 
 void Test::CompilerVsInterpreterBenchmark_data()
 {
-  QTest::addColumn<bool>("useCompiler");
-  QTest::newRow("Compiler") << true;
-  QTest::newRow("Interpreter") << false;
+  QTest::addColumn<int>("backend");
+  QTest::newRow("Compiler") << 0;
+  QTest::newRow("Interpreter") << 1;
+  QTest::newRow("Native") << 2;
 }
 
 void Test::CompilerVsInterpreterBenchmark()
 {
-  QFETCH(bool, useCompiler);
+  QFETCH(int, backend);
 
-  string function("(x-y)^pow(y-1,3/y)*(x*sqrt(25))");
+  string function(func1_str);
   istringstream input(function);
-  float result;
+  float x = 5.0F, y = 3.0F, t = -1.0F, result;
 
-  if (useCompiler) {
-    Compiler llvmc(&input);
-    llvmc.set( "x", 5.0F );
-    llvmc.set( "y", 3.0F );
-    llvmc.set( "t",-1.0F );
-    llvmc.compile();
+  Compiler *llvmc = NULL;
+  Interpreter *engine = NULL;
+  switch (backend) {
+    case 0:
+      llvmc = new Compiler(&input);
+      llvmc->set( "x", x );
+      llvmc->set( "y", y );
+      llvmc->set( "t", t );
+      llvmc->compile();
 
-    QBENCHMARK { result = llvmc.result(); }
-  } else {
-    Interpreter engine(&input);
-    engine.set( "x", 5.0F );
-    engine.set( "y", 3.0F );
-    engine.set( "t",-1.0F );
+      QBENCHMARK { result = llvmc->result(); }
+      delete llvmc;
+      break;
+    case 1:
+      engine = new Interpreter(&input);
+      engine->set( "x", x );
+      engine->set( "y", y );
+      engine->set( "t", t );
 
-    QBENCHMARK { result = engine.result(); }
+      QBENCHMARK { result = engine->result(); }
+      delete engine;
+      break;
+    case 2:
+      QBENCHMARK { result = func1f( x, y, t ); }
+      break;
   }
-
-  QCOMPARE( result, 100.0F );
 }
 
 void Test::fullValuesCompilerTest()
